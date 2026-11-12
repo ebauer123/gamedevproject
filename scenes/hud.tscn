@@ -1,0 +1,185 @@
+[gd_scene load_steps=5 format=3 uid="uid://hud_parkour_001"]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.08, 0.09, 0.12, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.7, 1, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+expand_margin_left = 16.0
+expand_margin_top = 16.0
+expand_margin_right = 16.0
+expand_margin_bottom = 16.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font_size = 28
+font_color = Color(0.2, 0.9, 1, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_stat"]
+font_size = 20
+font_color = Color(0.9, 0.95, 1, 1)
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="TopBar" type="MarginContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+
+[node name="HBox" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="TimerLabel" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+text = "00:00.00"
+label_settings = SubResource("LabelSettings_title")
+
+[node name="CheckpointLabel" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+text = "Checkpoint: 0 / 4"
+label_settings = SubResource("LabelSettings_stat")
+
+[node name="TokenLabel" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+text = "Tokens: 0 / 8"
+label_settings = SubResource("LabelSettings_stat")
+
+[node name="Crosshair" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Dot" type="ColorRect" parent="Crosshair"]
+custom_minimum_size = Vector2(6, 6)
+layout_mode = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.8)
+
+[node name="BottomBar" type="MarginContainer" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -80.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="BottomBar"]
+layout_mode = 2
+
+[node name="SpeedLabel" type="Label" parent="BottomBar/VBox"]
+layout_mode = 2
+text = "0.0 m/s"
+label_settings = SubResource("LabelSettings_title")
+
+[node name="HelpLabel" type="Label" parent="BottomBar/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 0.8)
+theme_override_font_sizes/font_size = 14
+text = "[WASD] Move   [Shift] Sprint   [Space] Jump / Wall Jump   [Ctrl] Slide   [R] Respawn   [Esc] Pause"
+
+[node name="VictoryPanel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -140.0
+offset_right = 180.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="VictoryPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Title" type="Label" parent="VictoryPanel/VBox"]
+layout_mode = 2
+text = "PARKOUR COMPLETE!"
+label_settings = SubResource("LabelSettings_title")
+horizontal_alignment = 1
+
+[node name="TimeResult" type="Label" parent="VictoryPanel/VBox"]
+layout_mode = 2
+text = "Time: 00:00.00"
+label_settings = SubResource("LabelSettings_stat")
+horizontal_alignment = 1
+
+[node name="TokensResult" type="Label" parent="VictoryPanel/VBox"]
+layout_mode = 2
+text = "Tokens: 0 / 8"
+label_settings = SubResource("LabelSettings_stat")
+horizontal_alignment = 1
+
+[node name="DeathsResult" type="Label" parent="VictoryPanel/VBox"]
+layout_mode = 2
+text = "Respawns: 0"
+label_settings = SubResource("LabelSettings_stat")
+horizontal_alignment = 1
+
+[node name="RestartButton" type="Button" parent="VictoryPanel/VBox"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "PLAY AGAIN"
+
+[node name="PausePanel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -140.0
+offset_top = -100.0
+offset_right = 140.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="PausePanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Title" type="Label" parent="PausePanel/VBox"]
+layout_mode = 2
+text = "PAUSED"
+label_settings = SubResource("LabelSettings_title")
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="PausePanel/VBox"]
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "RESUME"
+
+[node name="PauseRestartButton" type="Button" parent="PausePanel/VBox"]
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "RESTART"

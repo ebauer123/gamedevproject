@@ -1,0 +1,42 @@
+[gd_scene load_steps=7 format=3 uid="uid://boost_pad_001"]
+
+[ext_resource type="Script" path="res://scripts/boost_pad.gd" id="1_bpad"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(2.6, 0.6, 3.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_base"]
+size = Vector3(2.5, 0.15, 3.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_base"]
+albedo_color = Color(0.1, 0.12, 0.16, 1)
+metallic = 0.8
+roughness = 0.2
+
+[sub_resource type="PrismMesh" id="PrismMesh_chevron"]
+size = Vector3(1.4, 1.4, 0.15)
+
+[sub_resource type="StandardMaterial3D" id="Mat_chevron"]
+albedo_color = Color(0.0, 0.8, 1.0, 1)
+emission_enabled = true
+emission = Color(0.0, 0.85, 1.0, 1)
+emission_energy_multiplier = 3.0
+
+[node name="BoostPad" type="Area3D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_bpad")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+shape = SubResource("BoxShape3D_1")
+
+[node name="BaseMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0)
+mesh = SubResource("BoxMesh_base")
+surface_material_override/0 = SubResource("Mat_base")
+
+[node name="ChevronMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.16, 0)
+mesh = SubResource("PrismMesh_chevron")
+surface_material_override/0 = SubResource("Mat_chevron")

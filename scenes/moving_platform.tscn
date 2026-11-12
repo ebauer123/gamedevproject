@@ -1,0 +1,40 @@
+[gd_scene load_steps=7 format=3 uid="uid://moving_platform_001"]
+
+[ext_resource type="Script" path="res://scripts/moving_platform.gd" id="1_mplat"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(4, 0.6, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_body"]
+size = Vector3(4, 0.6, 4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_body"]
+albedo_color = Color(0.18, 0.2, 0.25, 1)
+metallic = 0.5
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_rim"]
+size = Vector3(4.08, 0.1, 4.08)
+
+[sub_resource type="StandardMaterial3D" id="Mat_rim"]
+albedo_color = Color(1.0, 0.3, 0.7, 1)
+emission_enabled = true
+emission = Color(1.0, 0.3, 0.7, 1)
+emission_energy_multiplier = 2.0
+
+[node name="MovingPlatform" type="AnimatableBody3D"]
+collision_mask = 0
+sync_to_physics = true
+script = ExtResource("1_mplat")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_1")
+
+[node name="PlatformMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_body")
+surface_material_override/0 = SubResource("Mat_body")
+
+[node name="EdgeMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.26, 0)
+mesh = SubResource("BoxMesh_rim")
+surface_material_override/0 = SubResource("Mat_rim")
