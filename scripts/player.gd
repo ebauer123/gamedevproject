@@ -1,24 +1,36 @@
 extends CharacterBody3D
 
-# Advanced 3D Parkour Controller for Godot 4
-# Includes: Sprinting, Sliding, Coyote Time, Jump Buffering, Double Jump,
-# Wall Running, Wall Jumping, Ledge Vaulting, Dynamic FOV, and Head Bob.
+# Grounded First-Person Parkour Controller (Mirror's Edge Style)
+# Features: Momentum build-up, Ledge Grab & Hanging, Mantling,
+# Skill Roll on landing, Hard Landing Stumble, Speed Vaulting,
+# Horizontal Wallrun, Vertical Wall Climb (Tic-Tac), and Realistic Footstep Cadence.
 
-@export var walk_speed: float = 7.5
-@export var sprint_speed: float = 12.0
-@export var slide_speed: float = 15.5
-@export var jump_velocity: float = 8.5
-@export var double_jump_velocity: float = 7.5
-@export var wall_jump_up_velocity: float = 8.0
-@export var wall_jump_kick_velocity: float = 9.0
-@export var gravity: float = 22.0
+enum State {
+	GROUND,
+	AIR,
+	SLIDING,
+	WALLRUN_HORIZONTAL,
+	WALLRUN_VERTICAL,
+	HANGING,
+	MANTLING,
+	SPEED_VAULT,
+	ROLLING,
+	HARD_LANDING
+}
+
+var current_state: State = State.GROUND
+
+# Movement Speeds & Momentum
+@export var walk_speed: float = 4.8
+@export var jog_speed: float = 6.2
+@export var max_sprint_speed: float = 10.2
+@export var slide_speed: float = 11.5
+@export var jump_velocity: float = 6.5
+@export var gravity: float = 20.0
 @export var mouse_sensitivity: float = 0.0022
 
-# Ground / Air Acceleration
-@export var ground_accel: float = 50.0
-@export var ground_friction: float = 38.0
-@export var air_accel: float = 22.0
-@export var air_friction: float = 3.0
+var momentum: float = 0.0 # 0.0 to 1.0 (builds while running forward)
+var current_speed: float = 5.0
 
 # Node References
 @onready var head: Node3D = $Head
@@ -26,43 +38,44 @@ extends CharacterBody3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var ray_wall_left: RayCast3D = $RayWallLeft
 @onready var ray_wall_right: RayCast3D = $RayWallRight
+@onready var ray_wall_front: RayCast3D = $RayWallFront
 @onready var ray_chest: RayCast3D = $RayChest
 @onready var ray_head_clear: RayCast3D = $RayHeadClear
 @onready var ray_vault_down: RayCast3D = $RayVaultDown
 
-# State Variables
-var is_sliding: bool = false
+# Timers & States
 var slide_timer: float = 0.0
-var slide_direction: Vector3 = Vector3.ZERO
+var wallrun_timer: float = 0.0
+var wallrun_side: float = 0.0 # -1 left, 1 right
+var wallrun_normal: Vector3 = Vector3.ZERO
 
-var is_wall_running: bool = false
-var wall_run_timer: float = 0.0
-var wall_run_normal: Vector3 = Vector3.ZERO
-var wall_side: float = 0.0 # -1 for left, 1 for right
+var mantle_start_pos: Vector3 = Vector3.ZERO
+var mantle_target_pos: Vector3 = Vector3.ZERO
+var mantle_progress: float = 0.0
+var mantle_duration: float = 0.35
 
-var is_vaulting: bool = false
-var vault_target_pos: Vector3 = Vector3.ZERO
-var vault_timer: float = 0.0
+var roll_timer: float = 0.0
+var roll_duration: float = 0.55
+var roll_buffer_timer: float = 0.0
 
-var can_double_jump: bool = true
+var hard_landing_timer: float = 0.0
 var coyote_timer: float = 0.0
 var jump_buffer_timer: float = 0.0
-var was_on_floor: bool = false
-var last_y_velocity: float = 0.0
+var fall_distance: float = 0.0
+var apex_y: float = 0.0
+var previous_y_velocity: float = 0.0
 
-# Head Bob and Camera Tilt
+# Footsteps & Head Bob
+var step_distance_accum: float = 0.0
 var bob_cycle: float = 0.0
-var camera_tilt: float = 0.0
-var landing_dip: float = 0.0
-var target_fov: float = 75.0
-const BASE_FOV: float = 75.0
-const SPRINT_FOV: float = 86.0
-const SLIDE_FOV: float = 92.0
-const WALLRUN_FOV: float = 83.0
+var camera_roll: float = 0.0
+var base_head_y: float = 1.55
 
-# Collision dimensions
-var normal_height: float = 1.8
-var crouch_height: float = 1.0
+# Dynamic FOV
+const BASE_FOV: float = 75.0
+const SPRINT_FOV: float = 88.0
+const SLIDE_FOV: float = 93.0
+var target_fov: float = 75.0
 
 func _ready() -> void:
 	_setup_input_actions()
@@ -97,11 +110,10 @@ func _add_action_key(action: String, key: Key) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		# Horizontal rotation on player body
-		rotate_y(-event.relative.x * mouse_sensitivity)
-		# Vertical rotation on head
-		head.rotate_x(-event.relative.y * mouse_sensitivity)
-		head.rotation.x = clampf(head.rotation.x, -deg_to_rad(89.0), deg_to_rad(89.0))
+		if current_state != State.ROLLING:
+			rotate_y(-event.relative.x * mouse_sensitivity)
+			head.rotate_x(-event.relative.y * mouse_sensitivity)
+			head.rotation.x = clampf(head.rotation.x, -deg_to_rad(85.0), deg_to_rad(85.0))
 	
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
@@ -113,7 +125,7 @@ func _physics_process(delta: float) -> void:
 		var gm = get_node_or_null("/root/GameManager")
 		var sm = get_node_or_null("/root/SoundManager")
 		if sm:
-			sm.play("respawn")
+			sm.play("land_hard")
 		if gm:
 			gm.respawn_player()
 		else:
@@ -121,314 +133,483 @@ func _physics_process(delta: float) -> void:
 			velocity = Vector3.ZERO
 		return
 
-	# Timers
-	if is_on_floor():
-		coyote_timer = 0.15
-		can_double_jump = true
-		is_wall_running = false
-	else:
-		coyote_timer = maxf(0.0, coyote_timer - delta)
-
+	# Decrement buffers
 	jump_buffer_timer = maxf(0.0, jump_buffer_timer - delta)
+	roll_buffer_timer = maxf(0.0, roll_buffer_timer - delta)
+	if Input.is_action_just_pressed("jump"):
+		jump_buffer_timer = 0.16
+	if Input.is_action_just_pressed("crouch"):
+		roll_buffer_timer = 0.32
 
-	# Read Input
-	var input_dir = _get_input_vector()
-	var jump_pressed = _is_jump_just_pressed()
-	var sprint_held = _is_sprint_pressed()
-	var crouch_held = _is_crouch_pressed()
+	# State Machine execution
+	match current_state:
+		State.GROUND:
+			_state_ground(delta)
+		State.AIR:
+			_state_air(delta)
+		State.SLIDING:
+			_state_sliding(delta)
+		State.WALLRUN_HORIZONTAL:
+			_state_wallrun_horizontal(delta)
+		State.WALLRUN_VERTICAL:
+			_state_wallrun_vertical(delta)
+		State.HANGING:
+			_state_hanging(delta)
+		State.MANTLING:
+			_state_mantling(delta)
+		State.SPEED_VAULT:
+			_state_speed_vault(delta)
+		State.ROLLING:
+			_state_rolling(delta)
+		State.HARD_LANDING:
+			_state_hard_landing(delta)
 
-	if jump_pressed:
-		jump_buffer_timer = 0.15
+	previous_y_velocity = velocity.y
+	_update_camera_and_hud(delta)
 
-	# Ledge Vaulting Update
-	if is_vaulting:
-		_process_vault(delta)
-		return
-
-	# Check for Ledge Vault Initiation
-	if not is_on_floor() and velocity.y > -2.0 and _check_vault():
-		return
-
-	# Handle Wall Running
-	_check_wall_run(delta, input_dir)
-
-	# Handle Jumping
-	_handle_jumping()
-
-	# Handle Sliding & Crouching
-	_handle_slide(delta, crouch_held, sprint_held, input_dir)
-
-	# Ground / Air Movement
-	if not is_vaulting:
-		_handle_movement(delta, input_dir, sprint_held)
-
-	# Gravity
+# --- STATE: GROUND ---
+func _state_ground(delta: float) -> void:
 	if not is_on_floor():
-		if is_wall_running:
-			# Wall run low gravity
-			velocity.y = maxf(velocity.y - (gravity * 0.18) * delta, -3.0)
-		else:
-			velocity.y -= gravity * delta
+		current_state = State.AIR
+		apex_y = global_position.y
+		coyote_timer = 0.15
+		return
 
-	last_y_velocity = velocity.y
+	coyote_timer = 0.15
+	var input_vec = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var is_sprinting = Input.is_action_pressed("sprint")
+	var is_moving_forward = input_vec.y < -0.3
+
+	# Momentum build-up (Flow)
+	if is_moving_forward:
+		var build_rate = 0.6 if is_sprinting else 0.4
+		momentum = minf(1.0, momentum + delta * build_rate)
+	else:
+		momentum = maxf(0.0, momentum - delta * 1.5)
+
+	# Calculate current target speed
+	var target_max = max_sprint_speed if is_sprinting else jog_speed
+	current_speed = lerpf(walk_speed, target_max, momentum)
+
+	# Jump execution
+	if jump_buffer_timer > 0.0:
+		jump_buffer_timer = 0.0
+		# Check for low obstacle speed vault
+		if _can_speed_vault():
+			_start_speed_vault()
+			return
+		_execute_jump()
+		return
+
+	# Slide initiation
+	if Input.is_action_just_pressed("crouch") or (Input.is_action_pressed("crouch") and momentum > 0.4):
+		if momentum > 0.3:
+			_start_slide()
+			return
+
+	# Ground movement & acceleration
+	var move_dir = (transform.basis * Vector3(input_vec.x, 0.0, input_vec.y)).normalized()
+	if move_dir.length() > 0.1:
+		var target_vel = move_dir * current_speed
+		velocity.x = move_toward(velocity.x, target_vel.x, 38.0 * delta)
+		velocity.z = move_toward(velocity.z, target_vel.z, 38.0 * delta)
+		_process_footsteps(delta, current_speed)
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, 32.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 32.0 * delta)
+
+	velocity.y = -0.5 # keep grounded
 	move_and_slide()
 
-	# Landing impact detection
-	if not was_on_floor and is_on_floor():
-		_on_land()
-	was_on_floor = is_on_floor()
+# --- STATE: AIR ---
+func _state_air(delta: float) -> void:
+	coyote_timer = maxf(0.0, coyote_timer - delta)
+	apex_y = maxf(apex_y, global_position.y)
 
-	# Camera effects (Tilt, FOV, Bob, Landing Dip)
-	_update_camera_effects(delta, input_dir, sprint_held)
-
-func _get_input_vector() -> Vector2:
-	return Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-
-func _is_jump_just_pressed() -> bool:
-	return Input.is_action_just_pressed("jump")
-
-func _is_sprint_pressed() -> bool:
-	return Input.is_action_pressed("sprint")
-
-func _is_crouch_pressed() -> bool:
-	return Input.is_action_pressed("crouch")
-
-func _handle_movement(delta: float, input_dir: Vector2, sprint_held: bool) -> void:
-	if is_sliding:
-		# Gradually decelerate slide towards normal crouch speed
-		var horizontal = Vector2(velocity.x, velocity.z)
-		horizontal = horizontal.move_toward(Vector2.ZERO, ground_friction * 0.45 * delta)
-		velocity.x = horizontal.x
-		velocity.z = horizontal.y
+	# Jump during coyote time
+	if jump_buffer_timer > 0.0 and coyote_timer > 0.0:
+		jump_buffer_timer = 0.0
+		coyote_timer = 0.0
+		_execute_jump()
 		return
 
-	# Calculate desired direction relative to player orientation
-	var transform_dir = (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
+	# Check for Ledge Grab / Hang while airborne & falling
+	if velocity.y < 1.0 and _check_ledge_grab():
+		return
 
-	var target_speed = walk_speed
-	if sprint_held and input_dir.y < -0.1: # Forward sprint
-		target_speed = sprint_speed
+	# Check for Vertical Wall Climb (Tic-Tac) when facing wall & jumping
+	if jump_buffer_timer > 0.0 and ray_wall_front and ray_wall_front.is_colliding():
+		jump_buffer_timer = 0.0
+		_start_vertical_wallrun()
+		return
 
-	var target_vel = transform_dir * target_speed
-	var current_horizontal = Vector3(velocity.x, 0.0, velocity.z)
+	# Check for Horizontal Wallrun
+	if _check_horizontal_wallrun():
+		return
 
+	# Apply realistic gravity
+	velocity.y -= gravity * delta
+
+	# Controlled air-strafe preserving forward momentum
+	var input_vec = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	if input_vec.length() > 0.1:
+		var air_dir = (transform.basis * Vector3(input_vec.x, 0.0, input_vec.y)).normalized()
+		velocity.x = move_toward(velocity.x, air_dir.x * current_speed, 14.0 * delta)
+		velocity.z = move_toward(velocity.z, air_dir.z * current_speed, 14.0 * delta)
+
+	move_and_slide()
+
+	# Landing detection
 	if is_on_floor():
-		if transform_dir.length() > 0.1:
-			current_horizontal = current_horizontal.move_toward(target_vel, ground_accel * delta)
-		else:
-			current_horizontal = current_horizontal.move_toward(Vector3.ZERO, ground_friction * delta)
+		_handle_landing()
+
+# --- STATE: SLIDING ---
+func _state_sliding(delta: float) -> void:
+	slide_timer -= delta
+	_set_crouch_height(true)
+
+	var h_vel = Vector2(velocity.x, velocity.z)
+	h_vel = h_vel.move_toward(Vector2.ZERO, 15.0 * delta)
+	velocity.x = h_vel.x
+	velocity.z = h_vel.y
+
+	if not is_on_floor():
+		velocity.y -= gravity * delta
 	else:
-		# Air control
-		if transform_dir.length() > 0.1:
-			current_horizontal = current_horizontal.move_toward(target_vel, air_accel * delta)
-		else:
-			current_horizontal = current_horizontal.move_toward(Vector3.ZERO, air_friction * delta)
+		velocity.y = -0.5
 
-	velocity.x = current_horizontal.x
-	velocity.z = current_horizontal.z
+	move_and_slide()
 
-func _handle_slide(delta: float, crouch_held: bool, sprint_held: bool, input_dir: Vector2) -> void:
-	var sm = get_node_or_null("/root/SoundManager")
-	var horiz_speed = Vector2(velocity.x, velocity.z).length()
-
-	# Start slide if running and pressing crouch
-	if is_on_floor() and crouch_held and not is_sliding:
-		if horiz_speed > walk_speed * 0.9:
-			is_sliding = true
-			slide_timer = 0.8
-			# Boost forward into slide
-			var move_forward = -transform.basis.z
-			if input_dir.length() > 0.1:
-				move_forward = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-			velocity.x = move_forward.x * slide_speed
-			velocity.z = move_forward.z * slide_speed
-			if sm:
-				sm.play("slide")
-		else:
-			# Regular crouch height
-			_set_crouch_height(true)
-
-	if is_sliding:
-		slide_timer -= delta
-		_set_crouch_height(true)
-		if slide_timer <= 0.0 or horiz_speed < walk_speed * 0.6 or not is_on_floor():
-			is_sliding = false
-			if not crouch_held:
-				_set_crouch_height(false)
-	elif not crouch_held:
+	# Jump out of slide
+	if jump_buffer_timer > 0.0 and is_on_floor():
+		jump_buffer_timer = 0.0
 		_set_crouch_height(false)
-
-func _set_crouch_height(crouching: bool) -> void:
-	var target_h = crouch_height if crouching else normal_height
-	var target_head_y = 0.7 if crouching else 1.55
-
-	if collision_shape and collision_shape.shape is CapsuleShape3D:
-		var cap = collision_shape.shape as CapsuleShape3D
-		cap.height = lerpf(cap.height, target_h, 0.25)
-		collision_shape.position.y = cap.height * 0.5
-	head.position.y = lerpf(head.position.y, target_head_y, 0.25)
-
-func _handle_jumping() -> void:
-	var sm = get_node_or_null("/root/SoundManager")
-
-	if jump_buffer_timer > 0.0:
-		# Wall jump
-		if is_wall_running:
-			jump_buffer_timer = 0.0
-			is_wall_running = false
-			velocity = wall_run_normal * wall_jump_kick_velocity + Vector3.UP * wall_jump_up_velocity
-			can_double_jump = true
-			if sm:
-				sm.play("wall_jump")
-			return
-
-		# Ground jump (including coyote time)
-		if coyote_timer > 0.0:
-			jump_buffer_timer = 0.0
-			coyote_timer = 0.0
-			velocity.y = jump_velocity
-			if sm:
-				sm.play("jump")
-			return
-
-		# Midair double jump
-		if can_double_jump and not is_on_floor():
-			jump_buffer_timer = 0.0
-			can_double_jump = false
-			velocity.y = double_jump_velocity
-			# Re-orient horizontal velocity towards input
-			var input = _get_input_vector()
-			if input.length() > 0.1:
-				var forward = (transform.basis * Vector3(input.x, 0, input.y)).normalized()
-				var speed = maxf(Vector2(velocity.x, velocity.z).length(), sprint_speed * 0.8)
-				velocity.x = forward.x * speed
-				velocity.z = forward.z * speed
-			if sm:
-				sm.play("double_jump")
-			return
-
-func _check_wall_run(delta: float, input_dir: Vector2) -> void:
-	if is_on_floor() or is_vaulting or input_dir.y >= 0.0:
-		is_wall_running = false
+		_execute_jump()
 		return
 
-	var left_colliding = ray_wall_left and ray_wall_left.is_colliding()
-	var right_colliding = ray_wall_right and ray_wall_right.is_colliding()
+	if slide_timer <= 0.0 or h_vel.length() < 3.0:
+		_set_crouch_height(false)
+		current_state = State.GROUND if is_on_floor() else State.AIR
 
-	if left_colliding or right_colliding:
-		var ray = ray_wall_left if left_colliding else ray_wall_right
-		var normal = ray.get_collision_normal()
+# --- STATE: WALLRUN HORIZONTAL ---
+func _state_wallrun_horizontal(delta: float) -> void:
+	wallrun_timer -= delta
 
-		# Must be a vertical wall (normal roughly horizontal)
-		if absf(normal.y) < 0.2:
-			if not is_wall_running:
-				is_wall_running = true
-				wall_run_timer = 1.4
-				wall_run_normal = normal
-				wall_side = -1.0 if left_colliding else 1.0
-				can_double_jump = true
+	# Low wall gravity
+	velocity.y = maxf(velocity.y - (gravity * 0.22) * delta, -2.5)
 
-			wall_run_timer -= delta
-			if wall_run_timer <= 0.0:
-				is_wall_running = false
-			else:
-				# Slide along wall forward tangent
-				var wall_forward = normal.cross(Vector3.UP)
-				if wall_forward.dot(-transform.basis.z) < 0.0:
-					wall_forward = -wall_forward
-				velocity.x = wall_forward.x * sprint_speed
-				velocity.z = wall_forward.z * sprint_speed
-			return
+	# Wall tangent direction
+	var wall_forward = wallrun_normal.cross(Vector3.UP)
+	if wall_forward.dot(-transform.basis.z) < 0.0:
+		wall_forward = -wall_forward
 
-	is_wall_running = false
+	velocity.x = wall_forward.x * (max_sprint_speed * 1.05)
+	velocity.z = wall_forward.z * (max_sprint_speed * 1.05)
 
-func _check_vault() -> bool:
+	move_and_slide()
+
+	# Wall jump off
+	if jump_buffer_timer > 0.0:
+		jump_buffer_timer = 0.0
+		var kick_dir = (wallrun_normal * 6.5 + wall_forward * 4.0 + Vector3.UP * 6.8).normalized()
+		velocity = kick_dir * 9.0
+		var sm = get_node_or_null("/root/SoundManager")
+		if sm:
+			sm.play("wall_hit", 1.1)
+		current_state = State.AIR
+		return
+
+	# End of wall or timer expired
+	var still_on_wall = (ray_wall_left and ray_wall_left.is_colliding()) or (ray_wall_right and ray_wall_right.is_colliding())
+	if wallrun_timer <= 0.0 or not still_on_wall or is_on_floor():
+		current_state = State.AIR
+
+# --- STATE: WALLRUN VERTICAL (TIC-TAC) ---
+func _state_wallrun_vertical(delta: float) -> void:
+	wallrun_timer -= delta
+	velocity.x = move_toward(velocity.x, 0.0, 20.0 * delta)
+	velocity.z = move_toward(velocity.z, 0.0, 20.0 * delta)
+	velocity.y -= gravity * 0.6 * delta
+
+	move_and_slide()
+
+	# Check if we can grab a ledge at the top
+	if _check_ledge_grab():
+		return
+
+	# Wall kick-off turn
+	if jump_buffer_timer > 0.0 and wallrun_timer < 0.3:
+		jump_buffer_timer = 0.0
+		var kick = transform.basis.z * 6.0 + Vector3.UP * 5.5
+		velocity = kick
+		var sm = get_node_or_null("/root/SoundManager")
+		if sm:
+			sm.play("wall_hit")
+		current_state = State.AIR
+		return
+
+	if wallrun_timer <= 0.0:
+		current_state = State.AIR
+
+# --- STATE: HANGING ---
+func _state_hanging(_delta: float) -> void:
+	velocity = Vector3.ZERO
+	# Pull up onto ledge
+	if Input.is_action_just_pressed("jump") or Input.is_action_pressed("move_forward"):
+		_start_mantle()
+		return
+	# Drop down
+	if Input.is_action_just_pressed("crouch") or Input.is_action_pressed("move_back"):
+		current_state = State.AIR
+		velocity = transform.basis.z * 1.5 + Vector3.DOWN * 1.0
+
+# --- STATE: MANTLING ---
+func _state_mantling(delta: float) -> void:
+	mantle_progress += delta / mantle_duration
+	global_position = mantle_start_pos.lerp(mantle_target_pos, minf(mantle_progress, 1.0))
+	velocity = Vector3.ZERO
+
+	if mantle_progress >= 1.0:
+		current_state = State.GROUND
+		momentum = 0.6
+		velocity = -transform.basis.z * jog_speed
+
+# --- STATE: SPEED VAULT ---
+func _state_speed_vault(delta: float) -> void:
+	mantle_progress += delta / 0.26
+	global_position = mantle_start_pos.lerp(mantle_target_pos, minf(mantle_progress, 1.0))
+
+	if mantle_progress >= 1.0:
+		current_state = State.GROUND
+		velocity = -transform.basis.z * current_speed
+
+# --- STATE: ROLLING ---
+func _state_rolling(delta: float) -> void:
+	roll_timer += delta
+	var progress = roll_timer / roll_duration
+	# 360 degree forward pitch roll
+	head.rotation.x = -sin(progress * PI) * deg_to_rad(45.0)
+	camera.rotation.z = sin(progress * TAU) * deg_to_rad(15.0)
+
+	_set_crouch_height(true)
+
+	# Forward roll momentum
+	var forward = -transform.basis.z
+	velocity.x = forward.x * max_sprint_speed
+	velocity.z = forward.z * max_sprint_speed
+	velocity.y = -0.5
+	move_and_slide()
+
+	if roll_timer >= roll_duration:
+		_set_crouch_height(false)
+		head.rotation.x = 0.0
+		camera.rotation.z = 0.0
+		current_state = State.GROUND
+		momentum = 0.85 # Reward successful roll with high momentum!
+
+# --- STATE: HARD LANDING ---
+func _state_hard_landing(delta: float) -> void:
+	hard_landing_timer -= delta
+	velocity = Vector3.ZERO
+	head.rotation.x = deg_to_rad(-18.0) * (hard_landing_timer / 0.6)
+
+	if hard_landing_timer <= 0.0:
+		head.rotation.x = 0.0
+		current_state = State.GROUND
+		momentum = 0.0
+
+# --- HELPER FUNCTIONS ---
+
+func _execute_jump() -> void:
+	velocity.y = jump_velocity
+	current_state = State.AIR
+	apex_y = global_position.y
+	var sm = get_node_or_null("/root/SoundManager")
+	if sm:
+		sm.play("jump", randf_range(0.95, 1.05))
+
+func _start_slide() -> void:
+	current_state = State.SLIDING
+	slide_timer = 0.75
+	var forward = -transform.basis.z
+	velocity.x = forward.x * slide_speed
+	velocity.z = forward.z * slide_speed
+	var sm = get_node_or_null("/root/SoundManager")
+	if sm:
+		sm.play("slide", 1.0)
+
+func _check_horizontal_wallrun() -> bool:
+	if momentum < 0.3:
+		return false
+	var left = ray_wall_left and ray_wall_left.is_colliding()
+	var right = ray_wall_right and ray_wall_right.is_colliding()
+	if not left and not right:
+		return false
+
+	var ray = ray_wall_left if left else ray_wall_right
+	var normal = ray.get_collision_normal()
+	if absf(normal.y) < 0.25: # vertical wall
+		current_state = State.WALLRUN_HORIZONTAL
+		wallrun_timer = 1.3
+		wallrun_normal = normal
+		wallrun_side = -1.0 if left else 1.0
+		velocity.y = maxf(velocity.y, 1.5)
+		var sm = get_node_or_null("/root/SoundManager")
+		if sm:
+			sm.play("wall_hit", 1.2)
+		return true
+	return false
+
+func _start_vertical_wallrun() -> void:
+	current_state = State.WALLRUN_VERTICAL
+	wallrun_timer = 0.45
+	velocity.y = 6.2
+	var sm = get_node_or_null("/root/SoundManager")
+	if sm:
+		sm.play("wall_hit", 0.95)
+
+func _check_ledge_grab() -> bool:
 	if not ray_chest or not ray_head_clear or not ray_vault_down:
 		return false
 
-	# Chest hits wall, head is clear to grab
 	if ray_chest.is_colliding() and not ray_head_clear.is_colliding():
 		ray_vault_down.force_raycast_update()
 		if ray_vault_down.is_colliding():
-			var hit_pos = ray_vault_down.get_collision_point()
-			var height_diff = hit_pos.y - global_position.y
-			if height_diff > 0.4 and height_diff < 1.6:
-				is_vaulting = true
-				vault_timer = 0.22
-				vault_target_pos = hit_pos + Vector3(0.0, 1.0, 0.0) + (-transform.basis.z * 0.4)
-				velocity = Vector3.ZERO
+			var hit_pt = ray_vault_down.get_collision_point()
+			var height_delta = hit_pt.y - global_position.y
+			if height_delta > 0.8 and height_delta < 2.3:
+				current_state = State.HANGING
+				global_position.y = hit_pt.y - 1.45
 				var sm = get_node_or_null("/root/SoundManager")
 				if sm:
-					sm.play("wall_jump", 1.2)
+					sm.play("grab", randf_range(0.95, 1.05))
 				return true
 	return false
 
-func _process_vault(delta: float) -> void:
-	vault_timer -= delta
-	global_position = global_position.lerp(vault_target_pos, delta * 14.0)
-	if vault_timer <= 0.0 or global_position.distance_to(vault_target_pos) < 0.2:
-		is_vaulting = false
-		velocity = -transform.basis.z * walk_speed
+func _can_speed_vault() -> bool:
+	if momentum < 0.4:
+		return false
+	if ray_chest and ray_chest.is_colliding() and not ray_head_clear.is_colliding():
+		ray_vault_down.force_raycast_update()
+		if ray_vault_down.is_colliding():
+			var hit_pt = ray_vault_down.get_collision_point()
+			var h_diff = hit_pt.y - global_position.y
+			return h_diff > 0.4 and h_diff < 1.3
+	return false
 
-func _on_land() -> void:
-	landing_dip = clampf(absf(last_y_velocity) * 0.02, 0.05, 0.35)
+func _start_speed_vault() -> void:
+	current_state = State.SPEED_VAULT
+	mantle_start_pos = global_position
+	var hit_pt = ray_vault_down.get_collision_point()
+	mantle_target_pos = hit_pt + Vector3(0.0, 1.0, 0.0) + (-transform.basis.z * 1.0)
+	mantle_progress = 0.0
 	var sm = get_node_or_null("/root/SoundManager")
-	if sm and absf(last_y_velocity) > 4.0:
-		sm.play("land", randf_range(0.9, 1.1), -2.0)
+	if sm:
+		sm.play("mantle", 1.2)
 
-func _update_camera_effects(delta: float, input_dir: Vector2, sprint_held: bool) -> void:
-	# Landing dip recovery
-	landing_dip = lerpf(landing_dip, 0.0, delta * 12.0)
-	camera.position.y = -landing_dip
+func _start_mantle() -> void:
+	current_state = State.MANTLING
+	mantle_start_pos = global_position
+	ray_vault_down.force_raycast_update()
+	var hit_pt = ray_vault_down.get_collision_point()
+	mantle_target_pos = hit_pt + Vector3(0.0, 1.0, 0.0) + (-transform.basis.z * 0.6)
+	mantle_progress = 0.0
+	var sm = get_node_or_null("/root/SoundManager")
+	if sm:
+		sm.play("mantle", 1.0)
 
+func _handle_landing() -> void:
+	var impact = absf(previous_y_velocity)
+	var sm = get_node_or_null("/root/SoundManager")
+
+	# High drop impact (needs roll)
+	if impact > 9.0:
+		var wants_roll = roll_buffer_timer > 0.0 or Input.is_action_pressed("crouch")
+		if wants_roll:
+			# Skill Roll!
+			current_state = State.ROLLING
+			roll_timer = 0.0
+			roll_buffer_timer = 0.0
+			if sm:
+				sm.play("roll", 1.0)
+			return
+		else:
+			# Hard landing stumble
+			current_state = State.HARD_LANDING
+			hard_landing_timer = 0.65
+			if sm:
+				sm.play("land_hard", 1.0)
+			return
+
+	# Normal landing
+	current_state = State.GROUND
+	if impact > 3.0 and sm:
+		sm.play("land_soft", randf_range(0.95, 1.05))
+
+func _process_footsteps(delta: float, speed: float) -> void:
+	step_distance_accum += speed * delta
+	var step_interval = 1.8 if speed > jog_speed else 1.3
+	if step_distance_accum >= step_interval:
+		step_distance_accum = 0.0
+		var sm = get_node_or_null("/root/SoundManager")
+		if sm:
+			sm.play("step", randf_range(0.9, 1.1), -4.0)
+
+func _set_crouch_height(crouching: bool) -> void:
+	var target_h = 1.0 if crouching else 1.8
+	var target_head_y = 0.75 if crouching else base_head_y
+
+	if collision_shape and collision_shape.shape is CapsuleShape3D:
+		var cap = collision_shape.shape as CapsuleShape3D
+		cap.height = lerpf(cap.height, target_h, 0.3)
+		collision_shape.position.y = cap.height * 0.5
+	head.position.y = lerpf(head.position.y, target_head_y, 0.3)
+
+func _update_camera_and_hud(delta: float) -> void:
 	# Head bob
 	var horiz_vel = Vector2(velocity.x, velocity.z).length()
-	if is_on_floor() and horiz_vel > 0.5 and not is_sliding:
-		var bob_speed = 10.0 if sprint_held else 7.0
-		bob_cycle += delta * bob_speed
-		camera.position.x = sin(bob_cycle) * 0.04
-		camera.position.y += absf(sin(bob_cycle * 2.0)) * 0.03
-	else:
-		bob_cycle = 0.0
+	if current_state == State.GROUND and horiz_vel > 1.0:
+		bob_cycle += delta * (current_speed * 1.5)
+		camera.position.x = sin(bob_cycle * 0.5) * 0.04
+		camera.position.y = absf(sin(bob_cycle)) * 0.04
+	elif current_state != State.ROLLING:
 		camera.position.x = lerpf(camera.position.x, 0.0, delta * 10.0)
+		camera.position.y = lerpf(camera.position.y, 0.0, delta * 10.0)
 
-	# Camera Roll / Tilt (Strafing and Wall Running)
+	# Camera Roll Tilt
 	var target_roll = 0.0
-	if is_wall_running:
-		target_roll = -wall_side * deg_to_rad(12.0)
-	elif input_dir.x != 0.0:
-		target_roll = -input_dir.x * deg_to_rad(2.5)
-
-	camera_tilt = lerpf(camera_tilt, target_roll, delta * 8.0)
-	camera.rotation.z = camera_tilt
+	if current_state == State.WALLRUN_HORIZONTAL:
+		target_roll = -wallrun_side * deg_to_rad(14.0)
+	camera_roll = lerpf(camera_roll, target_roll, delta * 8.0)
+	if current_state != State.ROLLING:
+		camera.rotation.z = camera_roll
 
 	# Dynamic FOV
-	if is_sliding:
+	if current_state == State.SLIDING or current_state == State.ROLLING:
 		target_fov = SLIDE_FOV
-	elif is_wall_running:
-		target_fov = WALLRUN_FOV
-	elif sprint_held and horiz_vel > walk_speed * 1.1:
-		target_fov = SPRINT_FOV
+	elif momentum > 0.6:
+		target_fov = lerpf(BASE_FOV, SPRINT_FOV, momentum)
 	else:
 		target_fov = BASE_FOV
 
-	camera.fov = lerpf(camera.fov, target_fov, delta * 8.0)
+	camera.fov = lerpf(camera.fov, target_fov, delta * 6.0)
 
-# Public Launch API (for Jump pads and Boost pads)
-func launch_upward(force: float) -> void:
-	velocity.y = force
-	can_double_jump = true
-
-func boost_forward(force: float) -> void:
+# Springboard integration (e.g. stepping on an AC unit or vault box)
+func springboard_launch(horizontal_boost: float, vertical_lift: float) -> void:
 	var forward = -transform.basis.z
-	velocity.x = forward.x * force
-	velocity.z = forward.z * force
-	target_fov = SLIDE_FOV + 5.0
+	velocity.x = forward.x * horizontal_boost
+	velocity.z = forward.z * horizontal_boost
+	velocity.y = vertical_lift
+	current_state = State.AIR
+	momentum = 1.0
+	var sm = get_node_or_null("/root/SoundManager")
+	if sm:
+		sm.play("springboard", 1.05)
 
 func teleport_to(pos: Vector3, rot_y: float) -> void:
 	global_position = pos
 	rotation.y = rot_y
 	velocity = Vector3.ZERO
-	is_wall_running = false
-	is_sliding = false
-	is_vaulting = false
+	current_state = State.GROUND
+	momentum = 0.0
+	_set_crouch_height(false)

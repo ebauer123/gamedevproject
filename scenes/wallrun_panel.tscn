@@ -1,0 +1,39 @@
+[gd_scene load_steps=7 format=3 uid="uid://wallrun_panel_001"]
+
+[sub_resource type="BoxShape3D" id="Shape_panel"]
+size = Vector3(0.3, 4.5, 12)
+
+[sub_resource type="BoxMesh" id="Mesh_panel"]
+size = Vector3(0.2, 4.4, 11.9)
+
+[sub_resource type="StandardMaterial3D" id="Mat_red_wall"]
+albedo_color = Color(0.92, 0.12, 0.18, 1)
+metallic = 0.6
+roughness = 0.25
+emission_enabled = true
+emission = Color(0.92, 0.1, 0.15, 1)
+emission_energy_multiplier = 0.7
+
+[sub_resource type="BoxMesh" id="Mesh_frame"]
+size = Vector3(0.28, 4.6, 12.1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_frame"]
+albedo_color = Color(0.18, 0.2, 0.25, 1)
+metallic = 0.8
+roughness = 0.3
+
+[node name="WallrunPanel" type="StaticBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
+shape = SubResource("Shape_panel")
+
+[node name="FrameMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
+mesh = SubResource("Mesh_frame")
+surface_material_override/0 = SubResource("Mat_frame")
+
+[node name="PanelMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
+mesh = SubResource("Mesh_panel")
+surface_material_override/0 = SubResource("Mat_red_wall")

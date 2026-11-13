@@ -17,16 +17,16 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	
 	inactive_material = StandardMaterial3D.new()
-	inactive_material.albedo_color = Color(0.9, 0.4, 0.1)
+	inactive_material.albedo_color = Color(0.95, 0.12, 0.18)
 	inactive_material.emission_enabled = true
-	inactive_material.emission = Color(0.9, 0.4, 0.1)
-	inactive_material.emission_energy_multiplier = 0.5
+	inactive_material.emission = Color(0.95, 0.1, 0.15)
+	inactive_material.emission_energy_multiplier = 0.8
 	
 	active_material = StandardMaterial3D.new()
-	active_material.albedo_color = Color(0.1, 0.9, 0.8)
+	active_material.albedo_color = Color(0.2, 0.9, 1.0)
 	active_material.emission_enabled = true
-	active_material.emission = Color(0.1, 0.9, 0.8)
-	active_material.emission_energy_multiplier = 2.0
+	active_material.emission = Color(0.2, 0.9, 1.0)
+	active_material.emission_energy_multiplier = 1.5
 	
 	if indicator_mesh:
 		indicator_mesh.material_override = inactive_material

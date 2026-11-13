@@ -1,0 +1,52 @@
+[gd_scene load_steps=8 format=3 uid="uid://ac_unit_springboard_001"]
+
+[ext_resource type="Script" path="res://scripts/ac_unit.gd" id="1_ac"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_body"]
+size = Vector3(2, 1.1, 1.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_body"]
+size = Vector3(2, 1.1, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_body"]
+albedo_color = Color(0.85, 0.87, 0.9, 1)
+metallic = 0.5
+roughness = 0.35
+
+[sub_resource type="BoxMesh" id="BoxMesh_pad"]
+size = Vector3(1.9, 0.12, 1.3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_pad"]
+albedo_color = Color(0.95, 0.12, 0.18, 1)
+roughness = 0.4
+emission_enabled = true
+emission = Color(0.95, 0.1, 0.15, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_trigger"]
+size = Vector3(1.8, 0.3, 1.2)
+
+[node name="ACUnit" type="StaticBody3D"]
+script = ExtResource("1_ac")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+shape = SubResource("BoxShape3D_body")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("BoxMesh_body")
+surface_material_override/0 = SubResource("Mat_body")
+
+[node name="PadMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0)
+mesh = SubResource("BoxMesh_pad")
+surface_material_override/0 = SubResource("Mat_pad")
+
+[node name="TriggerArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+collision_layer = 4
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TriggerArea"]
+shape = SubResource("BoxShape3D_trigger")

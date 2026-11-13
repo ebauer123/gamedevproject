@@ -1,0 +1,50 @@
+[gd_scene load_steps=7 format=3 uid="uid://balance_pipe_001"]
+
+[sub_resource type="CylinderShape3D" id="Shape_pipe"]
+height = 12.0
+radius = 0.35
+
+[sub_resource type="CylinderMesh" id="Mesh_pipe"]
+top_radius = 0.25
+bottom_radius = 0.25
+height = 12.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_red_pipe"]
+albedo_color = Color(0.95, 0.12, 0.18, 1)
+metallic = 0.7
+roughness = 0.3
+emission_enabled = true
+emission = Color(0.95, 0.1, 0.15, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="BoxMesh" id="Mesh_mount"]
+size = Vector3(0.8, 0.6, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="Mat_mount"]
+albedo_color = Color(0.2, 0.22, 0.28, 1)
+metallic = 0.8
+roughness = 0.4
+
+[sub_resource type="BoxShape3D" id="Shape_mount"]
+size = Vector3(0.8, 0.6, 0.8)
+
+[node name="BalancePipe" type="StaticBody3D"]
+
+[node name="PipeCollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.25, 0)
+shape = SubResource("Shape_pipe")
+
+[node name="PipeMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.25, 0)
+mesh = SubResource("Mesh_pipe")
+surface_material_override/0 = SubResource("Mat_red_pipe")
+
+[node name="MountStart" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 5.8)
+mesh = SubResource("Mesh_mount")
+surface_material_override/0 = SubResource("Mat_mount")
+
+[node name="MountEnd" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, -5.8)
+mesh = SubResource("Mesh_mount")
+surface_material_override/0 = SubResource("Mat_mount")

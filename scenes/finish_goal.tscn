@@ -1,28 +1,36 @@
-[gd_scene load_steps=8 format=3 uid="uid://finish_goal_001"]
+[gd_scene load_steps=9 format=3 uid="uid://finish_goal_001"]
 
 [ext_resource type="Script" path="res://scripts/finish_goal.gd" id="1_fgoal"]
 
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_1"]
-height = 3.5
-radius = 2.2
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(2.5, 3.2, 1.5)
 
-[sub_resource type="TorusMesh" id="TorusMesh_ring"]
-inner_radius = 1.4
-outer_radius = 2.0
+[sub_resource type="BoxMesh" id="BoxMesh_frame"]
+size = Vector3(2.4, 3.2, 0.4)
 
-[sub_resource type="StandardMaterial3D" id="Mat_ring"]
-albedo_color = Color(0.2, 1.0, 0.5, 1)
+[sub_resource type="StandardMaterial3D" id="Mat_frame"]
+albedo_color = Color(0.92, 0.94, 0.96, 1)
+metallic = 0.4
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="BoxMesh_door"]
+size = Vector3(1.8, 2.8, 0.25)
+
+[sub_resource type="StandardMaterial3D" id="Mat_red_door"]
+albedo_color = Color(0.95, 0.12, 0.18, 1)
+roughness = 0.3
 emission_enabled = true
-emission = Color(0.2, 1.0, 0.5, 1)
-emission_energy_multiplier = 3.5
+emission = Color(0.95, 0.1, 0.15, 1)
+emission_energy_multiplier = 0.8
 
-[sub_resource type="BoxMesh" id="BoxMesh_pillar"]
-size = Vector3(0.5, 4, 0.5)
+[sub_resource type="BoxMesh" id="BoxMesh_sign"]
+size = Vector3(1.4, 0.35, 0.3)
 
-[sub_resource type="StandardMaterial3D" id="Mat_pillar"]
-albedo_color = Color(0.12, 0.14, 0.18, 1)
-metallic = 0.8
-roughness = 0.2
+[sub_resource type="StandardMaterial3D" id="Mat_sign"]
+albedo_color = Color(0.2, 0.95, 0.4, 1)
+emission_enabled = true
+emission = Color(0.2, 0.95, 0.4, 1)
+emission_energy_multiplier = 2.0
 
 [node name="FinishGoal" type="Area3D"]
 collision_layer = 4
@@ -30,20 +38,20 @@ collision_mask = 2
 script = ExtResource("1_fgoal")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
-shape = SubResource("CylinderShape3D_1")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+shape = SubResource("BoxShape3D_1")
 
-[node name="PortalRing" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 2, 0)
-mesh = SubResource("TorusMesh_ring")
-surface_material_override/0 = SubResource("Mat_ring")
+[node name="FrameMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("BoxMesh_frame")
+surface_material_override/0 = SubResource("Mat_frame")
 
-[node name="PillarLeft" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, 0)
-mesh = SubResource("BoxMesh_pillar")
-surface_material_override/0 = SubResource("Mat_pillar")
+[node name="DoorMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
+mesh = SubResource("BoxMesh_door")
+surface_material_override/0 = SubResource("Mat_red_door")
 
-[node name="PillarRight" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 0)
-mesh = SubResource("BoxMesh_pillar")
-surface_material_override/0 = SubResource("Mat_pillar")
+[node name="ExitSign" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, 0.15)
+mesh = SubResource("BoxMesh_sign")
+surface_material_override/0 = SubResource("Mat_sign")

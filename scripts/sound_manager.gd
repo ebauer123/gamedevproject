@@ -1,10 +1,10 @@
 extends Node
 
-# Procedural Sound Effect Generator and Player
-# Generates 16-bit PCM synthesized sound effects at runtime with zero external dependencies.
+# Procedural Sound Effect Generator and Player (Mirror's Edge / Grounded Parkour Style)
+# Synthesizes realistic grounded parkour sounds: footsteps, cloth whooshes, rolls, mantles, grunts, and wind.
 
 var players: Array[AudioStreamPlayer] = []
-const POOL_SIZE: int = 8
+const POOL_SIZE: int = 10
 var sounds: Dictionary = {}
 
 func _ready() -> void:
@@ -17,16 +17,17 @@ func _ready() -> void:
 	_generate_all_sounds()
 
 func _generate_all_sounds() -> void:
+	sounds["step"] = _create_step_sfx()
 	sounds["jump"] = _create_jump_sfx()
-	sounds["double_jump"] = _create_double_jump_sfx()
-	sounds["land"] = _create_land_sfx()
-	sounds["wall_jump"] = _create_wall_jump_sfx()
+	sounds["land_soft"] = _create_land_soft_sfx()
+	sounds["land_hard"] = _create_land_hard_sfx()
+	sounds["roll"] = _create_roll_sfx()
+	sounds["grab"] = _create_grab_sfx()
+	sounds["mantle"] = _create_mantle_sfx()
+	sounds["wall_hit"] = _create_wall_hit_sfx()
 	sounds["slide"] = _create_slide_sfx()
+	sounds["springboard"] = _create_springboard_sfx()
 	sounds["checkpoint"] = _create_checkpoint_sfx()
-	sounds["coin"] = _create_coin_sfx()
-	sounds["boost"] = _create_boost_sfx()
-	sounds["crumble"] = _create_crumble_sfx()
-	sounds["respawn"] = _create_respawn_sfx()
 	sounds["victory"] = _create_victory_sfx()
 
 func play(sound_name: String, pitch_scale: float = 1.0, volume_db: float = 0.0) -> void:
@@ -39,7 +40,6 @@ func play(sound_name: String, pitch_scale: float = 1.0, volume_db: float = 0.0) 
 			p.volume_db = volume_db
 			p.play()
 			return
-	# If all busy, reuse the first
 	var p = players[0]
 	p.stream = sounds[sound_name]
 	p.pitch_scale = pitch_scale
@@ -66,188 +66,178 @@ func _build_wav(samples: PackedFloat32Array, rate: int = 22050) -> AudioStreamWA
 	wav.data = data
 	return wav
 
+# Footstep on rooftop concrete / metal
+func _create_step_sfx() -> AudioStreamWAV:
+	var rate = 22050
+	var duration = 0.08
+	var count = int(rate * duration)
+	var samples = PackedFloat32Array()
+	samples.resize(count)
+	for i in range(count):
+		var t = float(i) / count
+		var env = pow(1.0 - t, 3.0)
+		var noise = randf() * 2.0 - 1.0
+		var thump = sin(t * TAU * 110.0) * 0.6
+		samples[i] = (noise * 0.4 + thump) * env * 0.35
+	return _build_wav(samples, rate)
+
+# Leg push jump take-off
 func _create_jump_sfx() -> AudioStreamWAV:
-	var rate = 22050
-	var duration = 0.14
-	var count = int(rate * duration)
-	var samples = PackedFloat32Array()
-	samples.resize(count)
-	var phase = 0.0
-	for i in range(count):
-		var t = float(i) / count
-		var freq = lerpf(220.0, 580.0, t)
-		phase += (freq * TAU) / rate
-		var env = (1.0 - t) * minf(t * 20.0, 1.0)
-		# Square / Triangle blend for punchy retro synth jump
-		var wave = sin(phase) * 0.7 + (1.0 if sin(phase) > 0.0 else -1.0) * 0.3
-		samples[i] = wave * env * 0.45
-	return _build_wav(samples, rate)
-
-func _create_double_jump_sfx() -> AudioStreamWAV:
-	var rate = 22050
-	var duration = 0.16
-	var count = int(rate * duration)
-	var samples = PackedFloat32Array()
-	samples.resize(count)
-	var phase = 0.0
-	for i in range(count):
-		var t = float(i) / count
-		var freq = lerpf(380.0, 880.0, pow(t, 0.7))
-		phase += (freq * TAU) / rate
-		var env = (1.0 - t) * minf(t * 30.0, 1.0)
-		var wave = sin(phase) + 0.3 * sin(phase * 2.0)
-		samples[i] = wave * env * 0.4
-	return _build_wav(samples, rate)
-
-func _create_land_sfx() -> AudioStreamWAV:
 	var rate = 22050
 	var duration = 0.12
 	var count = int(rate * duration)
 	var samples = PackedFloat32Array()
 	samples.resize(count)
-	var phase = 0.0
 	for i in range(count):
 		var t = float(i) / count
-		var freq = lerpf(140.0, 45.0, t)
-		phase += (freq * TAU) / rate
-		var env = pow(1.0 - t, 2.0)
-		var noise = (randf() * 2.0 - 1.0) * 0.4
-		var wave = sin(phase) * 0.7 + noise
-		samples[i] = wave * env * 0.5
+		var env = sin(t * PI)
+		var whoosh = (randf() * 2.0 - 1.0) * 0.3 + sin(t * TAU * 140.0) * 0.7
+		samples[i] = whoosh * env * 0.4
 	return _build_wav(samples, rate)
 
-func _create_wall_jump_sfx() -> AudioStreamWAV:
+# Soft landing
+func _create_land_soft_sfx() -> AudioStreamWAV:
 	var rate = 22050
-	var duration = 0.13
+	var duration = 0.14
 	var count = int(rate * duration)
 	var samples = PackedFloat32Array()
 	samples.resize(count)
-	var phase = 0.0
 	for i in range(count):
 		var t = float(i) / count
-		var freq = lerpf(300.0, 650.0, t)
-		phase += (freq * TAU) / rate
-		var env = pow(1.0 - t, 1.5)
-		var wave = sin(phase) + (randf() * 2.0 - 1.0) * 0.2
-		samples[i] = wave * env * 0.45
+		var env = pow(1.0 - t, 2.5)
+		var low = sin(t * TAU * 80.0) * 0.8
+		var grit = (randf() * 2.0 - 1.0) * 0.3
+		samples[i] = (low + grit) * env * 0.5
 	return _build_wav(samples, rate)
 
-func _create_slide_sfx() -> AudioStreamWAV:
+# Hard landing stun / slam
+func _create_land_hard_sfx() -> AudioStreamWAV:
 	var rate = 22050
 	var duration = 0.28
 	var count = int(rate * duration)
 	var samples = PackedFloat32Array()
 	samples.resize(count)
-	var last = 0.0
 	for i in range(count):
 		var t = float(i) / count
-		var env = sin(t * PI)
-		# Low pass noise
-		var white = randf() * 2.0 - 1.0
-		last = lerpf(last, white, 0.18)
-		samples[i] = last * env * 0.35
+		var env = pow(1.0 - t, 1.8)
+		var impact = sin(t * TAU * 60.0) * 0.9 + sin(t * TAU * 120.0) * 0.4
+		var crunch = (randf() * 2.0 - 1.0) * 0.5
+		samples[i] = (impact + crunch) * env * 0.65
 	return _build_wav(samples, rate)
 
-func _create_checkpoint_sfx() -> AudioStreamWAV:
+# Smooth parkour roll whoosh
+func _create_roll_sfx() -> AudioStreamWAV:
 	var rate = 22050
 	var duration = 0.45
 	var count = int(rate * duration)
 	var samples = PackedFloat32Array()
 	samples.resize(count)
-	# 3 note arpeggio: C5, E5, G5
-	var notes = [523.25, 659.25, 783.99, 1046.50]
-	var seg_len = count / notes.size()
-	var phase = 0.0
-	for i in range(count):
-		var note_idx = mini(i / seg_len, notes.size() - 1)
-		var freq = notes[note_idx]
-		phase += (freq * TAU) / rate
-		var local_t = float(i % seg_len) / seg_len
-		var env = (1.0 - local_t * 0.6) * minf(local_t * 20.0, 1.0)
-		var wave = sin(phase) + 0.25 * sin(phase * 2.0)
-		samples[i] = wave * env * 0.4
-	return _build_wav(samples, rate)
-
-func _create_coin_sfx() -> AudioStreamWAV:
-	var rate = 22050
-	var duration = 0.22
-	var count = int(rate * duration)
-	var samples = PackedFloat32Array()
-	samples.resize(count)
-	var phase = 0.0
+	var filter = 0.0
 	for i in range(count):
 		var t = float(i) / count
-		var freq = 987.77 if t < 0.4 else 1318.51 # B5 then E6
-		phase += (freq * TAU) / rate
-		var env = pow(1.0 - t, 1.3)
-		var wave = sin(phase) + 0.2 * sin(phase * 3.0)
-		samples[i] = wave * env * 0.45
-	return _build_wav(samples, rate)
-
-func _create_boost_sfx() -> AudioStreamWAV:
-	var rate = 22050
-	var duration = 0.30
-	var count = int(rate * duration)
-	var samples = PackedFloat32Array()
-	samples.resize(count)
-	var phase = 0.0
-	for i in range(count):
-		var t = float(i) / count
-		var freq = lerpf(180.0, 950.0, pow(t, 1.4))
-		phase += (freq * TAU) / rate
 		var env = sin(t * PI)
-		var wave = sin(phase) * 0.8 + (randf() * 2.0 - 1.0) * 0.2
-		samples[i] = wave * env * 0.45
+		var noise = randf() * 2.0 - 1.0
+		filter = lerpf(filter, noise, 0.15)
+		var body_sweep = sin(pow(t, 0.8) * TAU * 95.0) * 0.5
+		samples[i] = (filter * 0.6 + body_sweep) * env * 0.45
 	return _build_wav(samples, rate)
 
-func _create_crumble_sfx() -> AudioStreamWAV:
+# Hand slapping a ledge to hang
+func _create_grab_sfx() -> AudioStreamWAV:
+	var rate = 22050
+	var duration = 0.15
+	var count = int(rate * duration)
+	var samples = PackedFloat32Array()
+	samples.resize(count)
+	for i in range(count):
+		var t = float(i) / count
+		var env = pow(1.0 - t, 2.0)
+		var slap = (randf() * 2.0 - 1.0) * 0.6 + sin(t * TAU * 160.0) * 0.5
+		samples[i] = slap * env * 0.55
+	return _build_wav(samples, rate)
+
+# Pulling up / mantling over a wall
+func _create_mantle_sfx() -> AudioStreamWAV:
 	var rate = 22050
 	var duration = 0.25
 	var count = int(rate * duration)
 	var samples = PackedFloat32Array()
 	samples.resize(count)
-	var phase = 0.0
 	for i in range(count):
 		var t = float(i) / count
-		var freq = lerpf(200.0, 60.0, t)
-		phase += (freq * TAU) / rate
-		var env = pow(1.0 - t, 0.8)
-		var noise = (randf() * 2.0 - 1.0) * 0.6
-		var wave = sin(phase) * 0.4 + noise
-		samples[i] = wave * env * 0.4
+		var env = sin(t * PI)
+		var effort = (randf() * 2.0 - 1.0) * 0.35 + sin(t * TAU * 100.0) * 0.5
+		samples[i] = effort * env * 0.4
 	return _build_wav(samples, rate)
 
-func _create_respawn_sfx() -> AudioStreamWAV:
+# Kicking off a wall (wallrun kick or tic-tac climb)
+func _create_wall_hit_sfx() -> AudioStreamWAV:
+	var rate = 22050
+	var duration = 0.12
+	var count = int(rate * duration)
+	var samples = PackedFloat32Array()
+	samples.resize(count)
+	for i in range(count):
+		var t = float(i) / count
+		var env = pow(1.0 - t, 2.5)
+		var impact = sin(t * TAU * 130.0) * 0.7 + (randf() * 2.0 - 1.0) * 0.4
+		samples[i] = impact * env * 0.5
+	return _build_wav(samples, rate)
+
+# Sliding on concrete / rooftop gravel
+func _create_slide_sfx() -> AudioStreamWAV:
 	var rate = 22050
 	var duration = 0.35
 	var count = int(rate * duration)
 	var samples = PackedFloat32Array()
 	samples.resize(count)
-	var phase = 0.0
+	var f = 0.0
 	for i in range(count):
 		var t = float(i) / count
-		var freq = lerpf(150.0, 440.0, t)
-		phase += (freq * TAU) / rate
-		var env = (1.0 - t)
-		var wave = sin(phase) * 0.8
-		samples[i] = wave * env * 0.4
+		var env = sin(t * PI)
+		var n = randf() * 2.0 - 1.0
+		f = lerpf(f, n, 0.22)
+		samples[i] = f * env * 0.4
 	return _build_wav(samples, rate)
 
-func _create_victory_sfx() -> AudioStreamWAV:
+# Springboard off an AC unit or vault box
+func _create_springboard_sfx() -> AudioStreamWAV:
 	var rate = 22050
-	var duration = 1.1
+	var duration = 0.16
 	var count = int(rate * duration)
 	var samples = PackedFloat32Array()
 	samples.resize(count)
-	var notes = [523.25, 659.25, 783.99, 1046.50, 1318.51] # C5, E5, G5, C6, E6
-	var seg_len = count / notes.size()
-	var phase = 0.0
 	for i in range(count):
-		var note_idx = mini(i / seg_len, notes.size() - 1)
-		var freq = notes[note_idx]
-		phase += (freq * TAU) / rate
-		var local_t = float(i % seg_len) / seg_len
-		var env = (1.0 - local_t * 0.3)
-		var wave = sin(phase) + 0.3 * sin(phase * 2.0) + 0.15 * sin(phase * 3.0)
-		samples[i] = wave * env * 0.4
+		var t = float(i) / count
+		var env = pow(1.0 - t, 2.0)
+		var metal = sin(t * TAU * 280.0) * 0.6 + sin(t * TAU * 140.0) * 0.5
+		samples[i] = metal * env * 0.5
+	return _build_wav(samples, rate)
+
+# Clean, subtle checkpoint chime
+func _create_checkpoint_sfx() -> AudioStreamWAV:
+	var rate = 22050
+	var duration = 0.35
+	var count = int(rate * duration)
+	var samples = PackedFloat32Array()
+	samples.resize(count)
+	for i in range(count):
+		var t = float(i) / count
+		var env = pow(1.0 - t, 1.5)
+		var wave = sin(t * TAU * 880.0) * 0.5 + sin(t * TAU * 1320.0) * 0.3
+		samples[i] = wave * env * 0.35
+	return _build_wav(samples, rate)
+
+# Victory chime
+func _create_victory_sfx() -> AudioStreamWAV:
+	var rate = 22050
+	var duration = 0.9
+	var count = int(rate * duration)
+	var samples = PackedFloat32Array()
+	samples.resize(count)
+	for i in range(count):
+		var t = float(i) / count
+		var freq = 659.25 if t < 0.25 else (880.0 if t < 0.5 else 1318.51)
+		var env = (1.0 - t * 0.5) * 0.4
+		samples[i] = sin(t * TAU * freq) * env
 	return _build_wav(samples, rate)

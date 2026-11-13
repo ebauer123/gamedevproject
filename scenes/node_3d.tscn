@@ -1,7 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://c7sm5bqaqptli"]
+[gd_scene format=3 uid="uid://c7sm5bqaqptli"]
 
-[ext_resource type="PackedScene" uid="uid://main_parkour_001" path="res://scenes/main.tscn" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://rgo7hulo2obo" path="res://scenes/main.tscn" id="1_main"]
 
-[node name="Node3D" type="Node3D"]
+[node name="Node3D" type="Node3D" unique_id=2130115649]
 
-[node name="Main" parent="." instance=ExtResource("1_main")]
+[node name="Main" parent="." unique_id=1406412755 instance=ExtResource("1_main")]

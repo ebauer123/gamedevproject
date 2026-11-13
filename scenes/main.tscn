@@ -1,399 +1,308 @@
-[gd_scene load_steps=32 format=3 uid="uid://main_parkour_001"]
+[gd_scene load_steps=34 format=3 uid="uid://main_parkour_001"]
 
 [ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
 [ext_resource type="PackedScene" uid="uid://player_parkour_001" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" uid="uid://hud_parkour_001" path="res://scenes/hud.tscn" id="3_hud"]
 [ext_resource type="PackedScene" uid="uid://checkpoint_001" path="res://scenes/checkpoint.tscn" id="4_ckpt"]
-[ext_resource type="PackedScene" uid="uid://jump_pad_001" path="res://scenes/jump_pad.tscn" id="5_jpad"]
-[ext_resource type="PackedScene" uid="uid://boost_pad_001" path="res://scenes/boost_pad.tscn" id="6_bpad"]
-[ext_resource type="PackedScene" uid="uid://moving_platform_001" path="res://scenes/moving_platform.tscn" id="7_mplat"]
-[ext_resource type="PackedScene" uid="uid://falling_platform_001" path="res://scenes/falling_platform.tscn" id="8_fplat"]
-[ext_resource type="PackedScene" uid="uid://collectible_001" path="res://scenes/collectible.tscn" id="9_coin"]
-[ext_resource type="PackedScene" uid="uid://finish_goal_001" path="res://scenes/finish_goal.tscn" id="10_fgoal"]
+[ext_resource type="PackedScene" uid="uid://ac_unit_springboard_001" path="res://scenes/ac_unit.tscn" id="5_ac"]
+[ext_resource type="PackedScene" uid="uid://vent_duct_slide_001" path="res://scenes/vent_duct.tscn" id="6_duct"]
+[ext_resource type="PackedScene" uid="uid://balance_pipe_001" path="res://scenes/balance_pipe.tscn" id="7_pipe"]
+[ext_resource type="PackedScene" uid="uid://wallrun_panel_001" path="res://scenes/wallrun_panel.tscn" id="8_wallrun"]
+[ext_resource type="PackedScene" uid="uid://collectible_001" path="res://scenes/collectible.tscn" id="9_bag"]
+[ext_resource type="PackedScene" uid="uid://finish_goal_001" path="res://scenes/finish_goal.tscn" id="10_exit"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
-sky_top_color = Color(0.2, 0.45, 0.85, 1)
-sky_horizon_color = Color(0.65, 0.75, 0.9, 1)
-ground_bottom_color = Color(0.08, 0.1, 0.14, 1)
-ground_horizon_color = Color(0.55, 0.65, 0.8, 1)
-sun_angle_max = 35.0
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_runner"]
+sky_top_color = Color(0.24, 0.58, 0.95, 1)
+sky_horizon_color = Color(0.82, 0.88, 0.96, 1)
+ground_bottom_color = Color(0.12, 0.14, 0.18, 1)
+ground_horizon_color = Color(0.72, 0.78, 0.86, 1)
+sun_angle_max = 28.0
 
-[sub_resource type="Sky" id="Sky_1"]
-sky_material = SubResource("ProceduralSkyMaterial_1")
+[sub_resource type="Sky" id="Sky_runner"]
+sky_material = SubResource("ProceduralSkyMaterial_runner")
 
-[sub_resource type="Environment" id="Environment_1"]
+[sub_resource type="Environment" id="Environment_runner"]
 background_mode = 2
-sky = SubResource("Sky_1")
+sky = SubResource("Sky_runner")
 tonemap_mode = 2
+tonemap_exposure = 1.05
 glow_enabled = true
-glow_intensity = 0.8
-glow_bloom = 0.2
+glow_intensity = 0.5
+glow_bloom = 0.12
 fog_enabled = true
-fog_light_color = Color(0.55, 0.65, 0.8, 1)
-fog_density = 0.002
+fog_light_color = Color(0.78, 0.85, 0.94, 1)
+fog_density = 0.0015
 
-[sub_resource type="StandardMaterial3D" id="Mat_plat"]
-albedo_color = Color(0.13, 0.16, 0.22, 1)
+[sub_resource type="StandardMaterial3D" id="Mat_roof_white"]
+albedo_color = Color(0.92, 0.94, 0.96, 1)
+roughness = 0.65
+
+[sub_resource type="StandardMaterial3D" id="Mat_bldg_facade"]
+albedo_color = Color(0.28, 0.32, 0.38, 1)
 metallic = 0.3
-roughness = 0.5
+roughness = 0.45
 
-[sub_resource type="StandardMaterial3D" id="Mat_obstacle"]
-albedo_color = Color(0.9, 0.35, 0.1, 1)
-metallic = 0.4
+[sub_resource type="StandardMaterial3D" id="Mat_parapet_red"]
+albedo_color = Color(0.95, 0.12, 0.18, 1)
 roughness = 0.4
 emission_enabled = true
-emission = Color(0.9, 0.3, 0.05, 1)
-emission_energy_multiplier = 0.6
+emission = Color(0.95, 0.1, 0.15, 1)
+emission_energy_multiplier = 0.4
 
-[sub_resource type="StandardMaterial3D" id="Mat_wallrun"]
-albedo_color = Color(0.12, 0.28, 0.45, 1)
-metallic = 0.7
-roughness = 0.2
-emission_enabled = true
-emission = Color(0.05, 0.4, 0.7, 1)
-emission_energy_multiplier = 0.8
-
-[sub_resource type="StandardMaterial3D" id="Mat_void"]
-albedo_color = Color(0.04, 0.05, 0.08, 1)
+[sub_resource type="StandardMaterial3D" id="Mat_ground_street"]
+albedo_color = Color(0.12, 0.13, 0.15, 1)
 roughness = 0.9
 
-[sub_resource type="BoxShape3D" id="Shape_start"]
-size = Vector3(8, 1, 8)
+[sub_resource type="BoxShape3D" id="Shape_roof_1"]
+size = Vector3(14, 20, 18)
 
-[sub_resource type="BoxMesh" id="Mesh_start"]
-size = Vector3(8, 1, 8)
+[sub_resource type="BoxMesh" id="Mesh_roof_1"]
+size = Vector3(14, 20, 18)
 
-[sub_resource type="BoxShape3D" id="Shape_vault_wall"]
-size = Vector3(4, 1.2, 0.4)
+[sub_resource type="BoxShape3D" id="Shape_parapet_side"]
+size = Vector3(0.4, 1.1, 18)
 
-[sub_resource type="BoxMesh" id="Mesh_vault_wall"]
-size = Vector3(4, 1.2, 0.4)
+[sub_resource type="BoxMesh" id="Mesh_parapet_side"]
+size = Vector3(0.4, 1.1, 18)
 
-[sub_resource type="BoxShape3D" id="Shape_slide_bar"]
-size = Vector3(6, 2.5, 0.5)
+[sub_resource type="BoxShape3D" id="Shape_roof_2"]
+size = Vector3(14, 21, 16)
 
-[sub_resource type="BoxMesh" id="Mesh_slide_bar"]
-size = Vector3(6, 2.5, 0.5)
+[sub_resource type="BoxMesh" id="Mesh_roof_2"]
+size = Vector3(14, 21, 16)
 
-[sub_resource type="BoxShape3D" id="Shape_step"]
-size = Vector3(3, 0.8, 3)
+[sub_resource type="BoxShape3D" id="Shape_tictac_wall"]
+size = Vector3(12, 3.2, 0.8)
 
-[sub_resource type="BoxMesh" id="Mesh_step"]
-size = Vector3(3, 0.8, 3)
+[sub_resource type="BoxMesh" id="Mesh_tictac_wall"]
+size = Vector3(12, 3.2, 0.8)
 
-[sub_resource type="BoxShape3D" id="Shape_wallrun"]
-size = Vector3(0.4, 5, 12)
+[sub_resource type="BoxShape3D" id="Shape_upper_deck"]
+size = Vector3(12, 24, 10)
 
-[sub_resource type="BoxMesh" id="Mesh_wallrun"]
-size = Vector3(0.4, 5, 12)
+[sub_resource type="BoxMesh" id="Mesh_upper_deck"]
+size = Vector3(12, 24, 10)
 
-[sub_resource type="BoxShape3D" id="Shape_beam"]
-size = Vector3(1.2, 0.6, 12)
+[sub_resource type="BoxShape3D" id="Shape_roof_3"]
+size = Vector3(12, 24, 14)
 
-[sub_resource type="BoxMesh" id="Mesh_beam"]
-size = Vector3(1.2, 0.6, 12)
+[sub_resource type="BoxMesh" id="Mesh_roof_3"]
+size = Vector3(12, 24, 14)
 
-[sub_resource type="BoxShape3D" id="Shape_summit"]
-size = Vector3(12, 1.5, 12)
+[sub_resource type="BoxShape3D" id="Shape_roof_4_low"]
+size = Vector3(14, 24, 20)
 
-[sub_resource type="BoxMesh" id="Mesh_summit"]
-size = Vector3(12, 1.5, 12)
+[sub_resource type="BoxMesh" id="Mesh_roof_4_low"]
+size = Vector3(14, 24, 20)
+
+[sub_resource type="BoxShape3D" id="Shape_roof_summit"]
+size = Vector3(18, 26, 18)
+
+[sub_resource type="BoxMesh" id="Mesh_roof_summit"]
+size = Vector3(18, 26, 18)
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_level")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_1")
+environment = SubResource("Environment_runner")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.819152, -0.40558, 0.395166, 0, 0.69779, 0.716302, -0.573576, -0.58676, 0.571597, 0, 20, 0)
+transform = Transform3D(0.866025, -0.286788, 0.409576, 0, 0.819152, 0.573576, -0.5, -0.49673, 0.709406, 0, 30, 0)
+light_color = Color(1, 0.98, 0.94, 1)
+light_energy = 1.15
 shadow_enabled = true
 
 [node name="HUD" parent="." instance=ExtResource("3_hud")]
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 5)
 
-[node name="VoidFloor" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -18, -120)
-mesh = SubResource("Mesh_summit")
-surface_material_override/0 = SubResource("Mat_void")
+[node name="SkylineBldg1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 10, -50)
+mesh = SubResource("Mesh_roof_summit")
+surface_material_override/0 = SubResource("Mat_bldg_facade")
 
-# --- TUTORIAL & WARMUP AREA ---
+[node name="SkylineBldg2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 15, -70)
+mesh = SubResource("Mesh_roof_summit")
+surface_material_override/0 = SubResource("Mat_bldg_facade")
 
-[node name="StartPlatform" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+[node name="SkylineBldg3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 25, -110)
+mesh = SubResource("Mesh_roof_summit")
+surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="Collision" type="CollisionShape3D" parent="StartPlatform"]
-shape = SubResource("Shape_start")
+[node name="SkylineBldg4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 20, -120)
+mesh = SubResource("Mesh_roof_summit")
+surface_material_override/0 = SubResource("Mat_bldg_facade")
 
-[node name="Mesh" type="MeshInstance3D" parent="StartPlatform"]
-mesh = SubResource("Mesh_start")
-surface_material_override/0 = SubResource("Mat_plat")
+[node name="StreetFloor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -35, -70)
 
-[node name="VaultPlatform" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -7)
+[node name="Collision" type="CollisionShape3D" parent="StreetFloor"]
+shape = SubResource("Shape_roof_summit")
 
-[node name="Collision" type="CollisionShape3D" parent="VaultPlatform"]
-shape = SubResource("Shape_start")
+[node name="Mesh" type="MeshInstance3D" parent="StreetFloor"]
+transform = Transform3D(15, 0, 0, 0, 1, 0, 0, 0, 15, 0, 0, 0)
+mesh = SubResource("Mesh_roof_summit")
+surface_material_override/0 = SubResource("Mat_ground_street")
 
-[node name="Mesh" type="MeshInstance3D" parent="VaultPlatform"]
-mesh = SubResource("Mesh_start")
-surface_material_override/0 = SubResource("Mat_plat")
+[node name="Rooftop1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0)
 
-[node name="VaultWall" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -7)
+[node name="Collision" type="CollisionShape3D" parent="Rooftop1"]
+shape = SubResource("Shape_roof_1")
 
-[node name="Collision" type="CollisionShape3D" parent="VaultWall"]
-shape = SubResource("Shape_vault_wall")
+[node name="Mesh" type="MeshInstance3D" parent="Rooftop1"]
+mesh = SubResource("Mesh_roof_1")
+surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="Mesh" type="MeshInstance3D" parent="VaultWall"]
-mesh = SubResource("Mesh_vault_wall")
-surface_material_override/0 = SubResource("Mat_obstacle")
+[node name="ParapetL1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8, 0.55, 0)
 
-[node name="SlidePlatform" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -16)
+[node name="Collision" type="CollisionShape3D" parent="ParapetL1"]
+shape = SubResource("Shape_parapet_side")
 
-[node name="Collision" type="CollisionShape3D" parent="SlidePlatform"]
-shape = SubResource("Shape_start")
+[node name="Mesh" type="MeshInstance3D" parent="ParapetL1"]
+mesh = SubResource("Mesh_parapet_side")
+surface_material_override/0 = SubResource("Mat_parapet_red")
 
-[node name="Mesh" type="MeshInstance3D" parent="SlidePlatform"]
-mesh = SubResource("Mesh_start")
-surface_material_override/0 = SubResource("Mat_plat")
+[node name="ParapetR1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8, 0.55, 0)
 
-[node name="SlideBarrier" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, -16)
+[node name="Collision" type="CollisionShape3D" parent="ParapetR1"]
+shape = SubResource("Shape_parapet_side")
 
-[node name="Collision" type="CollisionShape3D" parent="SlideBarrier"]
-shape = SubResource("Shape_slide_bar")
+[node name="Mesh" type="MeshInstance3D" parent="ParapetR1"]
+mesh = SubResource("Mesh_parapet_side")
+surface_material_override/0 = SubResource("Mat_parapet_red")
 
-[node name="Mesh" type="MeshInstance3D" parent="SlideBarrier"]
-mesh = SubResource("Mesh_slide_bar")
-surface_material_override/0 = SubResource("Mat_obstacle")
+[node name="ACUnitVault" parent="." instance=ExtResource("5_ac")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-# --- STAGE 1: STEPPING GAPS & MOVING PLATFORM ---
+[node name="Bag1" parent="." instance=ExtResource("9_bag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
-[node name="Step1" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -25)
+[node name="VentDuctSlide1" parent="." instance=ExtResource("6_duct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
 
-[node name="Collision" type="CollisionShape3D" parent="Step1"]
-shape = SubResource("Shape_step")
+[node name="Springboard1" parent="." instance=ExtResource("5_ac")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8.2)
+horizontal_boost = 11.5
+vertical_lift = 6.8
 
-[node name="Mesh" type="MeshInstance3D" parent="Step1"]
-mesh = SubResource("Mesh_step")
-surface_material_override/0 = SubResource("Mat_plat")
+[node name="Rooftop2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -9.5, -22)
 
-[node name="Step2" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.8, -32)
+[node name="Collision" type="CollisionShape3D" parent="Rooftop2"]
+shape = SubResource("Shape_roof_2")
 
-[node name="Collision" type="CollisionShape3D" parent="Step2"]
-shape = SubResource("Shape_step")
-
-[node name="Mesh" type="MeshInstance3D" parent="Step2"]
-mesh = SubResource("Mesh_step")
-surface_material_override/0 = SubResource("Mat_plat")
-
-[node name="Coin1" parent="." instance=ExtResource("9_coin")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 2.2, -32)
-
-[node name="Step3" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 1.6, -39)
-
-[node name="Collision" type="CollisionShape3D" parent="Step3"]
-shape = SubResource("Shape_step")
-
-[node name="Mesh" type="MeshInstance3D" parent="Step3"]
-mesh = SubResource("Mesh_step")
-surface_material_override/0 = SubResource("Mat_plat")
-
-[node name="MovingPlatform1" parent="." instance=ExtResource("7_mplat")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 2.5, -48)
-move_offset = Vector3(6, 0, 0)
-cycle_duration = 3.5
-
-[node name="LandingPlatform1" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -58)
-
-[node name="Collision" type="CollisionShape3D" parent="LandingPlatform1"]
-shape = SubResource("Shape_start")
-
-[node name="Mesh" type="MeshInstance3D" parent="LandingPlatform1"]
-mesh = SubResource("Mesh_start")
-surface_material_override/0 = SubResource("Mat_plat")
+[node name="Mesh" type="MeshInstance3D" parent="Rooftop2"]
+mesh = SubResource("Mesh_roof_2")
+surface_material_override/0 = SubResource("Mat_roof_white")
 
 [node name="Checkpoint1" parent="." instance=ExtResource("4_ckpt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, -58)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -20)
 checkpoint_index = 1
 
-# --- STAGE 2: JUMP PAD & VERTICAL ASCENT ---
+[node name="TicTacWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, -29.6)
 
-[node name="JumpPad1" parent="." instance=ExtResource("5_jpad")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, -63)
-launch_force = 17.5
+[node name="Collision" type="CollisionShape3D" parent="TicTacWall"]
+shape = SubResource("Shape_tictac_wall")
 
-[node name="Coin2" parent="." instance=ExtResource("9_coin")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, -66)
+[node name="Mesh" type="MeshInstance3D" parent="TicTacWall"]
+mesh = SubResource("Mesh_tictac_wall")
+surface_material_override/0 = SubResource("Mat_parapet_red")
 
-[node name="HighPlatform" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.5, -72)
+[node name="UpperDeck2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.8, -35)
 
-[node name="Collision" type="CollisionShape3D" parent="HighPlatform"]
-shape = SubResource("Shape_start")
+[node name="Collision" type="CollisionShape3D" parent="UpperDeck2"]
+shape = SubResource("Shape_upper_deck")
 
-[node name="Mesh" type="MeshInstance3D" parent="HighPlatform"]
-mesh = SubResource("Mesh_start")
-surface_material_override/0 = SubResource("Mat_plat")
+[node name="Mesh" type="MeshInstance3D" parent="UpperDeck2"]
+mesh = SubResource("Mesh_upper_deck")
+surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="MovingPlatform2" parent="." instance=ExtResource("7_mplat")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, -81)
-move_offset = Vector3(0, 8, 0)
-cycle_duration = 4.0
+[node name="Bag2" parent="." instance=ExtResource("9_bag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.8, -33)
 
-[node name="LandingPlatform2" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23, -91)
+[node name="WallrunPanelRight" parent="." instance=ExtResource("8_wallrun")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 4.0, -46)
 
-[node name="Collision" type="CollisionShape3D" parent="LandingPlatform2"]
-shape = SubResource("Shape_start")
+[node name="Bag3" parent="." instance=ExtResource("9_bag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 5.0, -46)
 
-[node name="Mesh" type="MeshInstance3D" parent="LandingPlatform2"]
-mesh = SubResource("Mesh_start")
-surface_material_override/0 = SubResource("Mat_plat")
+[node name="Rooftop3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.8, -58)
+
+[node name="Collision" type="CollisionShape3D" parent="Rooftop3"]
+shape = SubResource("Shape_roof_3")
+
+[node name="Mesh" type="MeshInstance3D" parent="Rooftop3"]
+mesh = SubResource("Mesh_roof_3")
+surface_material_override/0 = SubResource("Mat_roof_white")
 
 [node name="Checkpoint2" parent="." instance=ExtResource("4_ckpt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.5, -91)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.2, -55)
 checkpoint_index = 2
 
-# --- STAGE 3: WALL RUNNING ALLEY ---
+[node name="BalancePipe1" parent="." instance=ExtResource("7_pipe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, -67)
 
-[node name="WallRunLeft1" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 25.5, -100)
+[node name="HighDropLedge" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.5, -76)
 
-[node name="Collision" type="CollisionShape3D" parent="WallRunLeft1"]
-shape = SubResource("Shape_wallrun")
+[node name="Collision" type="CollisionShape3D" parent="HighDropLedge"]
+shape = SubResource("Shape_upper_deck")
 
-[node name="Mesh" type="MeshInstance3D" parent="WallRunLeft1"]
-mesh = SubResource("Mesh_wallrun")
-surface_material_override/0 = SubResource("Mat_wallrun")
+[node name="Mesh" type="MeshInstance3D" parent="HighDropLedge"]
+mesh = SubResource("Mesh_upper_deck")
+surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="WallRunRight1" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 25.5, -114)
+[node name="Bag4" parent="." instance=ExtResource("9_bag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.2, -74)
 
-[node name="Collision" type="CollisionShape3D" parent="WallRunRight1"]
-shape = SubResource("Shape_wallrun")
+[node name="Rooftop4Low" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8.0, -90)
 
-[node name="Mesh" type="MeshInstance3D" parent="WallRunRight1"]
-mesh = SubResource("Mesh_wallrun")
-surface_material_override/0 = SubResource("Mat_wallrun")
+[node name="Collision" type="CollisionShape3D" parent="Rooftop4Low"]
+shape = SubResource("Shape_roof_4_low")
 
-[node name="Coin3" parent="." instance=ExtResource("9_coin")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 25, -114)
-
-[node name="WallRunLeft2" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 25.5, -128)
-
-[node name="Collision" type="CollisionShape3D" parent="WallRunLeft2"]
-shape = SubResource("Shape_wallrun")
-
-[node name="Mesh" type="MeshInstance3D" parent="WallRunLeft2"]
-mesh = SubResource("Mesh_wallrun")
-surface_material_override/0 = SubResource("Mat_wallrun")
-
-[node name="LandingPlatform3" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23, -140)
-
-[node name="Collision" type="CollisionShape3D" parent="LandingPlatform3"]
-shape = SubResource("Shape_start")
-
-[node name="Mesh" type="MeshInstance3D" parent="LandingPlatform3"]
-mesh = SubResource("Mesh_start")
-surface_material_override/0 = SubResource("Mat_plat")
+[node name="Mesh" type="MeshInstance3D" parent="Rooftop4Low"]
+mesh = SubResource("Mesh_roof_4_low")
+surface_material_override/0 = SubResource("Mat_roof_white")
 
 [node name="Checkpoint3" parent="." instance=ExtResource("4_ckpt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.5, -140)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, -86)
 checkpoint_index = 3
 
-# --- STAGE 4: CRUMBLING PLATFORMS & NARROW BEAM ---
+[node name="VentDuctSlide2" parent="." instance=ExtResource("6_duct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, -92)
 
-[node name="FallingPlatform1" parent="." instance=ExtResource("8_fplat")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23, -149)
+[node name="Bag5" parent="." instance=ExtResource("9_bag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.8, -94)
 
-[node name="FallingPlatform2" parent="." instance=ExtResource("8_fplat")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 23.5, -156)
+[node name="SpringboardFinal" parent="." instance=ExtResource("5_ac")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, -98)
+horizontal_boost = 13.0
+vertical_lift = 7.5
 
-[node name="Coin4" parent="." instance=ExtResource("9_coin")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 25, -156)
+[node name="SummitRooftop" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.0, -114)
 
-[node name="FallingPlatform3" parent="." instance=ExtResource("8_fplat")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 24, -163)
+[node name="Collision" type="CollisionShape3D" parent="SummitRooftop"]
+shape = SubResource("Shape_roof_summit")
 
-[node name="NarrowBeam" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24.5, -174)
+[node name="Mesh" type="MeshInstance3D" parent="SummitRooftop"]
+mesh = SubResource("Mesh_roof_summit")
+surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="Collision" type="CollisionShape3D" parent="NarrowBeam"]
-shape = SubResource("Shape_beam")
+[node name="Bag6" parent="." instance=ExtResource("9_bag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 6.8, -112)
 
-[node name="Mesh" type="MeshInstance3D" parent="NarrowBeam"]
-mesh = SubResource("Mesh_beam")
-surface_material_override/0 = SubResource("Mat_plat")
-
-[node name="Coin5" parent="." instance=ExtResource("9_coin")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 26, -174)
-
-[node name="LandingPlatform4" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25, -186)
-
-[node name="Collision" type="CollisionShape3D" parent="LandingPlatform4"]
-shape = SubResource("Shape_start")
-
-[node name="Mesh" type="MeshInstance3D" parent="LandingPlatform4"]
-mesh = SubResource("Mesh_start")
-surface_material_override/0 = SubResource("Mat_plat")
-
-[node name="Checkpoint4" parent="." instance=ExtResource("4_ckpt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25.5, -186)
-checkpoint_index = 4
-
-# --- STAGE 5: BOOST RUNWAY & SUMMIT FINISH ---
-
-[node name="BoostRunway" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25, -196)
-
-[node name="Collision" type="CollisionShape3D" parent="BoostRunway"]
-shape = SubResource("Shape_start")
-
-[node name="Mesh" type="MeshInstance3D" parent="BoostRunway"]
-mesh = SubResource("Mesh_start")
-surface_material_override/0 = SubResource("Mat_plat")
-
-[node name="BoostPad1" parent="." instance=ExtResource("6_bpad")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25.5, -195)
-boost_speed = 25.0
-
-[node name="Coin6" parent="." instance=ExtResource("9_coin")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, -210)
-
-[node name="JumpPad2" parent="." instance=ExtResource("5_jpad")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19.5, -224)
-launch_force = 20.0
-
-[node name="Coin7" parent="." instance=ExtResource("9_coin")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 27.5, -232)
-
-[node name="SummitPlatform" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 31, -244)
-
-[node name="Collision" type="CollisionShape3D" parent="SummitPlatform"]
-shape = SubResource("Shape_summit")
-
-[node name="Mesh" type="MeshInstance3D" parent="SummitPlatform"]
-mesh = SubResource("Mesh_summit")
-surface_material_override/0 = SubResource("Mat_plat")
-
-[node name="FinishGoal" parent="." instance=ExtResource("10_fgoal")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 31.75, -247)
-
-[node name="Coin8" parent="." instance=ExtResource("9_coin")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 33, -244)
-
-[node name="Coin9" parent="." instance=ExtResource("9_coin")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 33, -244)
+[node name="ExtractionDoor" parent="." instance=ExtResource("10_exit")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.0, -118)

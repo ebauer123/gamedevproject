@@ -1,30 +1,42 @@
-[gd_scene load_steps=5 format=3 uid="uid://hud_parkour_001"]
+[gd_scene load_steps=7 format=3 uid="uid://hud_parkour_001"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.08, 0.09, 0.12, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.2, 0.7, 1, 0.8)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-expand_margin_left = 16.0
-expand_margin_top = 16.0
-expand_margin_right = 16.0
-expand_margin_bottom = 16.0
+bg_color = Color(0.95, 0.96, 0.98, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.95, 0.12, 0.18, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 20.0
+expand_margin_top = 20.0
+expand_margin_right = 20.0
+expand_margin_bottom = 20.0
 
 [sub_resource type="LabelSettings" id="LabelSettings_title"]
 font_size = 28
-font_color = Color(0.2, 0.9, 1, 1)
+font_color = Color(0.95, 0.12, 0.18, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_stat"]
-font_size = 20
-font_color = Color(0.9, 0.95, 1, 1)
+font_size = 18
+font_color = Color(0.12, 0.14, 0.18, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_hud_text"]
+font_size = 22
+font_color = Color(0.95, 0.96, 0.98, 1)
+outline_size = 3
+outline_color = Color(0.08, 0.08, 0.1, 0.8)
+
+[sub_resource type="LabelSettings" id="LabelSettings_prompt"]
+font_size = 22
+font_color = Color(0.95, 0.12, 0.18, 1)
+outline_size = 4
+outline_color = Color(1, 1, 1, 0.9)
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -45,17 +57,17 @@ theme_override_constants/separation = 40
 [node name="TimerLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
 text = "00:00.00"
-label_settings = SubResource("LabelSettings_title")
+label_settings = SubResource("LabelSettings_hud_text")
 
 [node name="CheckpointLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
-text = "Checkpoint: 0 / 4"
-label_settings = SubResource("LabelSettings_stat")
+text = "Rooftop: 0 / 4"
+label_settings = SubResource("LabelSettings_hud_text")
 
 [node name="TokenLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
-text = "Tokens: 0 / 8"
-label_settings = SubResource("LabelSettings_stat")
+text = "Bags: 0 / 6"
+label_settings = SubResource("LabelSettings_hud_text")
 
 [node name="Crosshair" type="CenterContainer" parent="."]
 anchors_preset = 15
@@ -65,11 +77,31 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Dot" type="ColorRect" parent="Crosshair"]
-custom_minimum_size = Vector2(6, 6)
+[node name="RunnerDot" type="ColorRect" parent="Crosshair"]
+custom_minimum_size = Vector2(4, 4)
 layout_mode = 2
 mouse_filter = 2
-color = Color(1, 1, 1, 0.8)
+color = Color(0.95, 0.15, 0.15, 0.9)
+
+[node name="ActionPrompt" type="CenterContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = 60.0
+offset_right = 250.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PromptLabel" type="Label" parent="ActionPrompt"]
+layout_mode = 2
+text = "[W / SPACE] MANTLE UP"
+label_settings = SubResource("LabelSettings_prompt")
+horizontal_alignment = 1
 
 [node name="BottomBar" type="MarginContainer" parent="."]
 anchors_preset = 12
@@ -87,14 +119,14 @@ layout_mode = 2
 
 [node name="SpeedLabel" type="Label" parent="BottomBar/VBox"]
 layout_mode = 2
-text = "0.0 m/s"
-label_settings = SubResource("LabelSettings_title")
+text = "0.0 m/s (FLOW: 0%)"
+label_settings = SubResource("LabelSettings_hud_text")
 
 [node name="HelpLabel" type="Label" parent="BottomBar/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 0.8)
+theme_override_colors/font_color = Color(0.9, 0.92, 0.95, 0.85)
 theme_override_font_sizes/font_size = 14
-text = "[WASD] Move   [Shift] Sprint   [Space] Jump / Wall Jump   [Ctrl] Slide   [R] Respawn   [Esc] Pause"
+text = "[WASD] Move   [Shift] Sprint Flow   [Space] Jump / Wall-Climb / Mantle   [Ctrl] Slide / Roll   [R] Restart Checkpoint"
 
 [node name="VictoryPanel" type="PanelContainer" parent="."]
 visible = false
@@ -118,7 +150,7 @@ alignment = 1
 
 [node name="Title" type="Label" parent="VictoryPanel/VBox"]
 layout_mode = 2
-text = "PARKOUR COMPLETE!"
+text = "RUN COMPLETED!"
 label_settings = SubResource("LabelSettings_title")
 horizontal_alignment = 1
 
@@ -130,13 +162,13 @@ horizontal_alignment = 1
 
 [node name="TokensResult" type="Label" parent="VictoryPanel/VBox"]
 layout_mode = 2
-text = "Tokens: 0 / 8"
+text = "Runner Bags: 0 / 6"
 label_settings = SubResource("LabelSettings_stat")
 horizontal_alignment = 1
 
 [node name="DeathsResult" type="Label" parent="VictoryPanel/VBox"]
 layout_mode = 2
-text = "Respawns: 0"
+text = "Falls: 0"
 label_settings = SubResource("LabelSettings_stat")
 horizontal_alignment = 1
 
@@ -144,7 +176,7 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(160, 40)
 layout_mode = 2
 size_flags_horizontal = 4
-text = "PLAY AGAIN"
+text = "RUN AGAIN"
 
 [node name="PausePanel" type="PanelContainer" parent="."]
 visible = false
