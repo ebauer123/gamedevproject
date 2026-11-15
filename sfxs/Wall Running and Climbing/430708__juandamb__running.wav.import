@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dodu0e5w6smni"
+path="res://.godot/imported/430708__juandamb__running.wav-1c6a9c98418bf9cbf2068226995b1307.sample"
+
+[deps]
+
+source_file="res://sfxs/Wall Running and Climbing/430708__juandamb__running.wav"
+dest_files=["res://.godot/imported/430708__juandamb__running.wav-1c6a9c98418bf9cbf2068226995b1307.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
