@@ -26,6 +26,10 @@ MCPRuntimeServer="*res://addons/godot_mcp_toolkit/runtime/mcp_runtime_server.gd"
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[dotnet]
+
+project/assembly_name="Mirror-s Edge Rooftop Parkour"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot_mcp_toolkit/plugin.cfg")
