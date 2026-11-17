@@ -1,15 +1,15 @@
-[gd_scene load_steps=34 format=3 uid="uid://main_parkour_001"]
+[gd_scene format=3 uid="uid://bpipv5hxqk5ta"]
 
-[ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
-[ext_resource type="PackedScene" uid="uid://player_parkour_001" path="res://scenes/player.tscn" id="2_player"]
-[ext_resource type="PackedScene" uid="uid://hud_parkour_001" path="res://scenes/hud.tscn" id="3_hud"]
-[ext_resource type="PackedScene" uid="uid://checkpoint_001" path="res://scenes/checkpoint.tscn" id="4_ckpt"]
-[ext_resource type="PackedScene" uid="uid://ac_unit_springboard_001" path="res://scenes/ac_unit.tscn" id="5_ac"]
-[ext_resource type="PackedScene" uid="uid://vent_duct_slide_001" path="res://scenes/vent_duct.tscn" id="6_duct"]
-[ext_resource type="PackedScene" uid="uid://balance_pipe_001" path="res://scenes/balance_pipe.tscn" id="7_pipe"]
-[ext_resource type="PackedScene" uid="uid://wallrun_panel_001" path="res://scenes/wallrun_panel.tscn" id="8_wallrun"]
-[ext_resource type="PackedScene" uid="uid://collectible_001" path="res://scenes/collectible.tscn" id="9_bag"]
-[ext_resource type="PackedScene" uid="uid://finish_goal_001" path="res://scenes/finish_goal.tscn" id="10_exit"]
+[ext_resource type="Script" uid="uid://bnx50iwtgjwf1" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="3_hud"]
+[ext_resource type="PackedScene" path="res://scenes/checkpoint.tscn" id="4_ckpt"]
+[ext_resource type="PackedScene" path="res://scenes/ac_unit.tscn" id="5_ac"]
+[ext_resource type="PackedScene" path="res://scenes/vent_duct.tscn" id="6_duct"]
+[ext_resource type="PackedScene" path="res://scenes/balance_pipe.tscn" id="7_pipe"]
+[ext_resource type="PackedScene" path="res://scenes/wallrun_panel.tscn" id="8_wallrun"]
+[ext_resource type="PackedScene" path="res://scenes/collectible.tscn" id="9_bag"]
+[ext_resource type="PackedScene" path="res://scenes/finish_goal.tscn" id="10_exit"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_runner"]
 sky_top_color = Color(0.24, 0.58, 0.95, 1)
@@ -33,21 +33,20 @@ fog_enabled = true
 fog_light_color = Color(0.78, 0.85, 0.94, 1)
 fog_density = 0.0015
 
-[sub_resource type="StandardMaterial3D" id="Mat_roof_white"]
-albedo_color = Color(0.92, 0.94, 0.96, 1)
-roughness = 0.65
+[sub_resource type="BoxMesh" id="Mesh_roof_summit"]
+size = Vector3(18, 26, 18)
 
 [sub_resource type="StandardMaterial3D" id="Mat_bldg_facade"]
 albedo_color = Color(0.28, 0.32, 0.38, 1)
 metallic = 0.3
 roughness = 0.45
 
-[sub_resource type="StandardMaterial3D" id="Mat_parapet_red"]
-albedo_color = Color(0.95, 0.12, 0.18, 1)
-roughness = 0.4
-emission_enabled = true
-emission = Color(0.95, 0.1, 0.15, 1)
-emission_energy_multiplier = 0.4
+[sub_resource type="StandardMaterial3D" id="Mat_roof_white"]
+albedo_color = Color(0.92, 0.94, 0.96, 1)
+roughness = 0.65
+
+[sub_resource type="BoxShape3D" id="Shape_roof_summit"]
+size = Vector3(18, 26, 18)
 
 [sub_resource type="StandardMaterial3D" id="Mat_ground_street"]
 albedo_color = Color(0.12, 0.13, 0.15, 1)
@@ -64,6 +63,13 @@ size = Vector3(0.4, 1.1, 18)
 
 [sub_resource type="BoxMesh" id="Mesh_parapet_side"]
 size = Vector3(0.4, 1.1, 18)
+
+[sub_resource type="StandardMaterial3D" id="Mat_parapet_red"]
+albedo_color = Color(0.95, 0.12, 0.18, 1)
+roughness = 0.4
+emission_enabled = true
+emission = Color(0.95, 0.1, 0.15, 1)
+emission_energy_multiplier = 0.4
 
 [sub_resource type="BoxShape3D" id="Shape_roof_2"]
 size = Vector3(14, 21, 16)
@@ -95,214 +101,206 @@ size = Vector3(14, 24, 20)
 [sub_resource type="BoxMesh" id="Mesh_roof_4_low"]
 size = Vector3(14, 24, 20)
 
-[sub_resource type="BoxShape3D" id="Shape_roof_summit"]
-size = Vector3(18, 26, 18)
-
-[sub_resource type="BoxMesh" id="Mesh_roof_summit"]
-size = Vector3(18, 26, 18)
-
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=1859979762]
 script = ExtResource("1_level")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=566635788]
 environment = SubResource("Environment_runner")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1455345680]
 transform = Transform3D(0.866025, -0.286788, 0.409576, 0, 0.819152, 0.573576, -0.5, -0.49673, 0.709406, 0, 30, 0)
 light_color = Color(1, 0.98, 0.94, 1)
 light_energy = 1.15
 shadow_enabled = true
 
-[node name="HUD" parent="." instance=ExtResource("3_hud")]
+[node name="HUD" parent="." unique_id=524465735 instance=ExtResource("3_hud")]
 
-[node name="Player" parent="." instance=ExtResource("2_player")]
+[node name="Player" parent="." unique_id=2037600447 instance=ExtResource("2_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 5)
 
-[node name="SkylineBldg1" type="MeshInstance3D" parent="."]
+[node name="SkylineBldg1" type="MeshInstance3D" parent="." unique_id=1861248413]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 10, -50)
 mesh = SubResource("Mesh_roof_summit")
 surface_material_override/0 = SubResource("Mat_bldg_facade")
 
-[node name="SkylineBldg2" type="MeshInstance3D" parent="."]
+[node name="SkylineBldg2" type="MeshInstance3D" parent="." unique_id=1199706325]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 15, -70)
 mesh = SubResource("Mesh_roof_summit")
 surface_material_override/0 = SubResource("Mat_bldg_facade")
 
-[node name="SkylineBldg3" type="MeshInstance3D" parent="."]
+[node name="SkylineBldg3" type="MeshInstance3D" parent="." unique_id=1136671603]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 25, -110)
 mesh = SubResource("Mesh_roof_summit")
 surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="SkylineBldg4" type="MeshInstance3D" parent="."]
+[node name="SkylineBldg4" type="MeshInstance3D" parent="." unique_id=1116270920]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 20, -120)
 mesh = SubResource("Mesh_roof_summit")
 surface_material_override/0 = SubResource("Mat_bldg_facade")
 
-[node name="StreetFloor" type="StaticBody3D" parent="."]
+[node name="StreetFloor" type="StaticBody3D" parent="." unique_id=1237396118]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -35, -70)
 
-[node name="Collision" type="CollisionShape3D" parent="StreetFloor"]
+[node name="Collision" type="CollisionShape3D" parent="StreetFloor" unique_id=1901218573]
 shape = SubResource("Shape_roof_summit")
 
-[node name="Mesh" type="MeshInstance3D" parent="StreetFloor"]
+[node name="Mesh" type="MeshInstance3D" parent="StreetFloor" unique_id=2080629280]
 transform = Transform3D(15, 0, 0, 0, 1, 0, 0, 0, 15, 0, 0, 0)
 mesh = SubResource("Mesh_roof_summit")
 surface_material_override/0 = SubResource("Mat_ground_street")
 
-[node name="Rooftop1" type="StaticBody3D" parent="."]
+[node name="Rooftop1" type="StaticBody3D" parent="." unique_id=1388522782]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0)
 
-[node name="Collision" type="CollisionShape3D" parent="Rooftop1"]
+[node name="Collision" type="CollisionShape3D" parent="Rooftop1" unique_id=139212373]
 shape = SubResource("Shape_roof_1")
 
-[node name="Mesh" type="MeshInstance3D" parent="Rooftop1"]
+[node name="Mesh" type="MeshInstance3D" parent="Rooftop1" unique_id=362293370]
 mesh = SubResource("Mesh_roof_1")
 surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="ParapetL1" type="StaticBody3D" parent="."]
+[node name="ParapetL1" type="StaticBody3D" parent="." unique_id=582438541]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8, 0.55, 0)
 
-[node name="Collision" type="CollisionShape3D" parent="ParapetL1"]
+[node name="Collision" type="CollisionShape3D" parent="ParapetL1" unique_id=544173172]
 shape = SubResource("Shape_parapet_side")
 
-[node name="Mesh" type="MeshInstance3D" parent="ParapetL1"]
+[node name="Mesh" type="MeshInstance3D" parent="ParapetL1" unique_id=1334572034]
 mesh = SubResource("Mesh_parapet_side")
 surface_material_override/0 = SubResource("Mat_parapet_red")
 
-[node name="ParapetR1" type="StaticBody3D" parent="."]
+[node name="ParapetR1" type="StaticBody3D" parent="." unique_id=348416484]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8, 0.55, 0)
 
-[node name="Collision" type="CollisionShape3D" parent="ParapetR1"]
+[node name="Collision" type="CollisionShape3D" parent="ParapetR1" unique_id=1504779563]
 shape = SubResource("Shape_parapet_side")
 
-[node name="Mesh" type="MeshInstance3D" parent="ParapetR1"]
+[node name="Mesh" type="MeshInstance3D" parent="ParapetR1" unique_id=1887669931]
 mesh = SubResource("Mesh_parapet_side")
 surface_material_override/0 = SubResource("Mat_parapet_red")
 
-[node name="ACUnitVault" parent="." instance=ExtResource("5_ac")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+[node name="ACUnitVault" parent="." unique_id=1532711034 instance=ExtResource("5_ac")]
 
-[node name="Bag1" parent="." instance=ExtResource("9_bag")]
+[node name="Bag1" parent="." unique_id=368016664 instance=ExtResource("9_bag")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
-[node name="VentDuctSlide1" parent="." instance=ExtResource("6_duct")]
+[node name="VentDuctSlide1" parent="." unique_id=197069600 instance=ExtResource("6_duct")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
 
-[node name="Springboard1" parent="." instance=ExtResource("5_ac")]
+[node name="Springboard1" parent="." unique_id=910288870 instance=ExtResource("5_ac")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8.2)
 horizontal_boost = 11.5
 vertical_lift = 6.8
 
-[node name="Rooftop2" type="StaticBody3D" parent="."]
+[node name="Rooftop2" type="StaticBody3D" parent="." unique_id=201170665]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -9.5, -22)
 
-[node name="Collision" type="CollisionShape3D" parent="Rooftop2"]
+[node name="Collision" type="CollisionShape3D" parent="Rooftop2" unique_id=710303438]
 shape = SubResource("Shape_roof_2")
 
-[node name="Mesh" type="MeshInstance3D" parent="Rooftop2"]
+[node name="Mesh" type="MeshInstance3D" parent="Rooftop2" unique_id=342166802]
 mesh = SubResource("Mesh_roof_2")
 surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="Checkpoint1" parent="." instance=ExtResource("4_ckpt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -20)
-checkpoint_index = 1
+[node name="Checkpoint1" parent="." unique_id=743317779 instance=ExtResource("4_ckpt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -20)
 
-[node name="TicTacWall" type="StaticBody3D" parent="."]
+[node name="TicTacWall" type="StaticBody3D" parent="." unique_id=1055306180]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, -29.6)
 
-[node name="Collision" type="CollisionShape3D" parent="TicTacWall"]
+[node name="Collision" type="CollisionShape3D" parent="TicTacWall" unique_id=1333188090]
 shape = SubResource("Shape_tictac_wall")
 
-[node name="Mesh" type="MeshInstance3D" parent="TicTacWall"]
+[node name="Mesh" type="MeshInstance3D" parent="TicTacWall" unique_id=868635922]
 mesh = SubResource("Mesh_tictac_wall")
 surface_material_override/0 = SubResource("Mat_parapet_red")
 
-[node name="UpperDeck2" type="StaticBody3D" parent="."]
+[node name="UpperDeck2" type="StaticBody3D" parent="." unique_id=1115522281]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.8, -35)
 
-[node name="Collision" type="CollisionShape3D" parent="UpperDeck2"]
+[node name="Collision" type="CollisionShape3D" parent="UpperDeck2" unique_id=1180479824]
 shape = SubResource("Shape_upper_deck")
 
-[node name="Mesh" type="MeshInstance3D" parent="UpperDeck2"]
+[node name="Mesh" type="MeshInstance3D" parent="UpperDeck2" unique_id=2077969822]
 mesh = SubResource("Mesh_upper_deck")
 surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="Bag2" parent="." instance=ExtResource("9_bag")]
+[node name="Bag2" parent="." unique_id=1076314094 instance=ExtResource("9_bag")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.8, -33)
 
-[node name="WallrunPanelRight" parent="." instance=ExtResource("8_wallrun")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 4.0, -46)
+[node name="WallrunPanelRight" parent="." unique_id=1910674110 instance=ExtResource("8_wallrun")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 4, -46)
 
-[node name="Bag3" parent="." instance=ExtResource("9_bag")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 5.0, -46)
+[node name="Bag3" parent="." unique_id=1064915253 instance=ExtResource("9_bag")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 5, -46)
 
-[node name="Rooftop3" type="StaticBody3D" parent="."]
+[node name="Rooftop3" type="StaticBody3D" parent="." unique_id=649245298]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.8, -58)
 
-[node name="Collision" type="CollisionShape3D" parent="Rooftop3"]
+[node name="Collision" type="CollisionShape3D" parent="Rooftop3" unique_id=776644347]
 shape = SubResource("Shape_roof_3")
 
-[node name="Mesh" type="MeshInstance3D" parent="Rooftop3"]
+[node name="Mesh" type="MeshInstance3D" parent="Rooftop3" unique_id=1822991335]
 mesh = SubResource("Mesh_roof_3")
 surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="Checkpoint2" parent="." instance=ExtResource("4_ckpt")]
+[node name="Checkpoint2" parent="." unique_id=946060520 instance=ExtResource("4_ckpt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.2, -55)
 checkpoint_index = 2
 
-[node name="BalancePipe1" parent="." instance=ExtResource("7_pipe")]
+[node name="BalancePipe1" parent="." unique_id=121694101 instance=ExtResource("7_pipe")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, -67)
 
-[node name="HighDropLedge" type="StaticBody3D" parent="."]
+[node name="HighDropLedge" type="StaticBody3D" parent="." unique_id=577578824]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.5, -76)
 
-[node name="Collision" type="CollisionShape3D" parent="HighDropLedge"]
+[node name="Collision" type="CollisionShape3D" parent="HighDropLedge" unique_id=2129666105]
 shape = SubResource("Shape_upper_deck")
 
-[node name="Mesh" type="MeshInstance3D" parent="HighDropLedge"]
+[node name="Mesh" type="MeshInstance3D" parent="HighDropLedge" unique_id=1087386337]
 mesh = SubResource("Mesh_upper_deck")
 surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="Bag4" parent="." instance=ExtResource("9_bag")]
+[node name="Bag4" parent="." unique_id=1875576245 instance=ExtResource("9_bag")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.2, -74)
 
-[node name="Rooftop4Low" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8.0, -90)
+[node name="Rooftop4Low" type="StaticBody3D" parent="." unique_id=2064385574]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8, -90)
 
-[node name="Collision" type="CollisionShape3D" parent="Rooftop4Low"]
+[node name="Collision" type="CollisionShape3D" parent="Rooftop4Low" unique_id=1092797253]
 shape = SubResource("Shape_roof_4_low")
 
-[node name="Mesh" type="MeshInstance3D" parent="Rooftop4Low"]
+[node name="Mesh" type="MeshInstance3D" parent="Rooftop4Low" unique_id=112533374]
 mesh = SubResource("Mesh_roof_4_low")
 surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="Checkpoint3" parent="." instance=ExtResource("4_ckpt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, -86)
+[node name="Checkpoint3" parent="." unique_id=1066800596 instance=ExtResource("4_ckpt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -86)
 checkpoint_index = 3
 
-[node name="VentDuctSlide2" parent="." instance=ExtResource("6_duct")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, -92)
+[node name="VentDuctSlide2" parent="." unique_id=1383122640 instance=ExtResource("6_duct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -92)
 
-[node name="Bag5" parent="." instance=ExtResource("9_bag")]
+[node name="Bag5" parent="." unique_id=1919466974 instance=ExtResource("9_bag")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4.8, -94)
 
-[node name="SpringboardFinal" parent="." instance=ExtResource("5_ac")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, -98)
+[node name="SpringboardFinal" parent="." unique_id=2008119514 instance=ExtResource("5_ac")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -98)
 horizontal_boost = 13.0
 vertical_lift = 7.5
 
-[node name="SummitRooftop" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.0, -114)
+[node name="SummitRooftop" type="StaticBody3D" parent="." unique_id=248959996]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, -114)
 
-[node name="Collision" type="CollisionShape3D" parent="SummitRooftop"]
+[node name="Collision" type="CollisionShape3D" parent="SummitRooftop" unique_id=468802311]
 shape = SubResource("Shape_roof_summit")
 
-[node name="Mesh" type="MeshInstance3D" parent="SummitRooftop"]
+[node name="Mesh" type="MeshInstance3D" parent="SummitRooftop" unique_id=647568378]
 mesh = SubResource("Mesh_roof_summit")
 surface_material_override/0 = SubResource("Mat_roof_white")
 
-[node name="Bag6" parent="." instance=ExtResource("9_bag")]
+[node name="Bag6" parent="." unique_id=1878838468 instance=ExtResource("9_bag")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 6.8, -112)
 
-[node name="ExtractionDoor" parent="." instance=ExtResource("10_exit")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.0, -118)
+[node name="ExtractionDoor" parent="." unique_id=2022131174 instance=ExtResource("10_exit")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -118)

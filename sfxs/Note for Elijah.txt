@@ -13,9 +13,13 @@ Besides, I think only the first implementation can properly reflect the speed ch
 Important: Might want to slow the player down a little, the current speed makes the steps a little too fast. But we can do that later
 
 
+FB: I think the looped sfx should be fine, but if you want to implement the separate footsteps I do think that would make the game feel more immersive
+(and since running/walking is so important having it sound good is always a good thing)
+
 
 2. Jumping: I recommend Footstep_leather_ground_concrete_right_005 but you can check out some of the other sfxs
 
+FB: I think that works
 
 
 3. Landing: Footstep_leather_ground_concrete_right_006 (Same comment as above)
@@ -24,6 +28,7 @@ For landing on two feet (or hard landing), I would use the first or second sfx f
 
 Let me know if you want to use and need me to crop it out of the full audio (It is already in the folder if you want to crop it)
 
+FB: I like the first sfx from the video for the hard landing
 
 
 4. Sliding: There are a few sliding sfx in the zapsplat folder but they might be too short, so here are my suggestions.
@@ -34,6 +39,7 @@ Suggestion 2: Check out this video and find one sliding sfx that you like, I rec
 
 P.S. Just like the Landing SFXs, the full audio file is already in the folder, so you can crop it if you like.
 
+FB: I think #20 is my favorite, the others are a bit hard on the ears
 
 
 5. Running: Same implementations as Walking
@@ -41,6 +47,7 @@ P.S. Just like the Landing SFXs, the full audio file is already in the folder, s
 Another thing to add is that if we use the looped version of the audio, we'd probably have to match the speed and animation to the audio, so that is slightly more work compared
 to implementation 1 in the walking section
 
+FB: Okay it might be worth it to implement separate footsteps then as it'll be easier to pull off at different speeds
 
 
 6. Wall Running / Climbing: There are already 3 sfxs in the folder so we can use any one of these
@@ -50,7 +57,14 @@ Or we can also use implementation 1 and match the audio to the speed / animation
 P.S. I think it's better if we rename the wall running vertically to wall climbing just for clarity but it's up to you
 
 
+FB: Yes that is a good name change, I don't really know how else you would wall run lol. 
+I think if we use implementation 1 we can just increase the pitch or make it sligtly quieter 
+when running on walls to give the impression of height (if there isn't a good stepping sfx option for walls)
+
 
 7. Hanging / Mantling / Vaulting: Unfortunately the best thing I can find is the "Hand Contact" sfx to simulate the sound of the player character touching the surface
 
 Maybe we have to be creative and make our own sfx for these but for now I think a hand contact sfx would do.
+
+FB: Yeah that'll do for now, we'd probably just need to find some material sfx for metal and stuff.
+Definitely needs to be a bit louder though
