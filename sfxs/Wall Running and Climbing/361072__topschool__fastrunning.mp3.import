@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bbgwrpfwyf6gw"
+path="res://.godot/imported/361072__topschool__fastrunning.mp3-637e604d2b12b7f9b690a3e80d2c89a2.mp3str"
+
+[deps]
+
+source_file="res://sfxs/Wall Running and Climbing/361072__topschool__fastrunning.mp3"
+dest_files=["res://.godot/imported/361072__topschool__fastrunning.mp3-637e604d2b12b7f9b690a3e80d2c89a2.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

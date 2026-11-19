@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://eypnj0ue6q8d"
+path="res://.godot/imported/Hand to Hand Contact Sound - The Hollywood Edge Sound Effects Library.mp3-ee30525b7c6b9fabbb350896fc33716f.mp3str"
+
+[deps]
+
+source_file="res://sfxs/Hand Contact Sound/Hand to Hand Contact Sound - The Hollywood Edge Sound Effects Library.mp3"
+dest_files=["res://.godot/imported/Hand to Hand Contact Sound - The Hollywood Edge Sound Effects Library.mp3-ee30525b7c6b9fabbb350896fc33716f.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
